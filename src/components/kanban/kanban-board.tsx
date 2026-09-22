@@ -1,143 +1,219 @@
 'use client';
 
-import React, { useState, useTransition, useEffect } from 'react';
-import { DragDropContext, DropResult } from '@hello-pangea/dnd';
-import { TaskItem, TaskStatus } from '@/types/kanban';
-import { TeamMemberItem } from '@/types/team';
-import { KanbanColumn } from './kanban-column';
-import { updateTaskStatusAndOrder } from '@/app/actions/tasks';
+import { useState, useTransition } from 'react';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { updateTaskStatus, createTask, deleteTask } from '@/app/actions/kanban';
+import { Plus, MoreVertical, Trash2, Clock, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { TaskModal } from './task-modal';
-import { useTranslation } from '@/context/language-context';
 
-interface KanbanBoardProps {
-  initialTasks: TaskItem[];
-  projectId: string;
-  teamMembers: TeamMemberItem[];
-  currentUserId: string;
+export type Priority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+export type Status = 'TODO' | 'IN_PROGRESS' | 'REVIEW' | 'DONE';
+
+export interface Task {
+  id: string;
+  title: string;
+  description: string | null;
+  status: Status;
+  priority: Priority;
+  order_index: number;
+  assignee?: {
+    id: string;
+    full_name: string;
+    username: string;
+  } | null;
 }
 
-const COLUMNS: TaskStatus[] = ['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'DONE'];
+const COLUMNS: { id: Status; title: string; color: string }[] = [
+  { id: 'TODO', title: 'To Do', color: 'bg-slate-500' },
+  { id: 'IN_PROGRESS', title: 'In Progress', color: 'bg-blue-500' },
+  { id: 'REVIEW', title: 'Review', color: 'bg-amber-500' },
+  { id: 'DONE', title: 'Done', color: 'bg-green-500' },
+];
 
-export function KanbanBoard({ initialTasks, projectId, teamMembers, currentUserId }: KanbanBoardProps) {
-  const { t } = useTranslation();
-  const [tasks, setTasks] = useState<TaskItem[]>(initialTasks);
-  const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
-  const [, startTransition] = useTransition();
+const PRIORITY_COLORS = {
+  LOW: 'text-slate-400 bg-slate-400/10 border-slate-400/20',
+  MEDIUM: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
+  HIGH: 'text-amber-400 bg-amber-400/10 border-amber-400/20',
+  URGENT: 'text-rose-400 bg-rose-400/10 border-rose-400/20',
+};
 
-  useEffect(() => {
-    setTasks(initialTasks);
-  }, [initialTasks]);
+export function KanbanBoard({ projectId, initialTasks }: { projectId: string; initialTasks: Task[] }) {
+  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [isPending, startTransition] = useTransition();
 
-  const onDragEnd = (result: DropResult) => {
-    const { source, destination, draggableId } = result;
+  const handleDragEnd = (result: DropResult) => {
+    const { destination, source, draggableId } = result;
 
     if (!destination) return;
-    if (source.droppableId === destination.droppableId && source.index === destination.index) return;
+    if (destination.droppableId === source.droppableId && destination.index === source.index) return;
 
-    const sourceStatus = source.droppableId as TaskStatus;
-    const destStatus = destination.droppableId as TaskStatus;
+    const sourceStatus = source.droppableId as Status;
+    const destStatus = destination.droppableId as Status;
 
-    const prevTasks = [...tasks];
+    // Optimistic update
+    const newTasks = Array.from(tasks);
+    const draggedTaskIndex = newTasks.findIndex(t => t.id === draggableId);
+    if (draggedTaskIndex === -1) return;
     
-    // Find the task being moved
-    const movedTask = tasks.find((t) => t.id === draggableId);
-    if (!movedTask) return;
+    const draggedTask = newTasks[draggedTaskIndex];
+    
+    // Remove from source array visually
+    newTasks.splice(draggedTaskIndex, 1);
+    
+    // Find where to insert
+    const destTasks = newTasks.filter(t => t.status === destStatus).sort((a, b) => a.order_index - b.order_index);
+    destTasks.splice(destination.index, 0, draggedTask);
 
-    // Separate tasks by columns
-    const destTasks = tasks
-      .filter((t) => t.status === destStatus && t.id !== draggableId)
-      .sort((a, b) => a.order_index - b.order_index);
-
-    // Insert into destination at destination.index
-    destTasks.splice(destination.index, 0, {
-      ...movedTask,
-      status: destStatus,
+    // Reorder dest tasks visually
+    destTasks.forEach((t, i) => {
+      const idx = newTasks.findIndex(nt => nt.id === t.id);
+      if (idx !== -1) {
+        newTasks[idx] = { ...newTasks[idx], status: destStatus, order_index: i };
+      }
     });
 
-    // Re-assign order_index for destination tasks
-    const updatedDestTasks = destTasks.map((t, index) => ({
-      ...t,
-      order_index: index,
-    }));
+    // Add dragged task back
+    draggedTask.status = destStatus;
+    draggedTask.order_index = destination.index;
+    newTasks.push(draggedTask);
 
-    // Build the new total task state
-    const newTasksMap = new Map<string, TaskItem>();
-    tasks.forEach((t) => newTasksMap.set(t.id, t));
+    setTasks(newTasks);
 
-    updatedDestTasks.forEach((t) => newTasksMap.set(t.id, t));
-
-    // Re-order remaining source tasks if moved across different columns
-    if (sourceStatus !== destStatus) {
-      const remainingSourceTasks = tasks
-        .filter((t) => t.status === sourceStatus && t.id !== draggableId)
-        .sort((a, b) => a.order_index - b.order_index)
-        .map((t, index) => ({ ...t, order_index: index }));
-
-      remainingSourceTasks.forEach((t) => newTasksMap.set(t.id, t));
-    }
-
-    const optimisticTaskList = Array.from(newTasksMap.values());
-    
-    // Optimistic UI Update
-    setTasks(optimisticTaskList);
-
-    // Sync to backend via Server Action
+    // Server update
     startTransition(async () => {
-      const payloadTasks = updatedDestTasks.map((t) => ({
-        id: t.id,
-        status: t.status,
-        order_index: t.order_index,
-      }));
-
-      const res = await updateTaskStatusAndOrder({
-        taskId: draggableId,
-        projectId,
-        newStatus: destStatus,
-        newOrderIndex: destination.index,
-        updatedTasks: payloadTasks,
-      });
-
+      const res = await updateTaskStatus(draggableId, destStatus, destination.index);
       if (!res.success) {
-        setTasks(prevTasks);
-        toast.error(res.error || 'Failed to update task order.');
+        toast.error('Failed to move task: ' + res.error);
+        setTasks(initialTasks); // Rollback on error
       }
     });
   };
 
-  const getTasksByStatus = (status: TaskStatus) => {
-    return tasks
-      .filter((task) => task.status === status)
-      .sort((a, b) => a.order_index - b.order_index);
+  const handleCreateTask = (status: Status) => {
+    const title = window.prompt('Enter task title:');
+    if (!title) return;
+
+    const formData = new FormData();
+    formData.append('project_id', projectId);
+    formData.append('title', title);
+    formData.append('status', status);
+
+    startTransition(async () => {
+      const res = await createTask(formData);
+      if (res.success && res.task) {
+        toast.success('Task created');
+        setTasks([...tasks, res.task as Task]);
+      } else {
+        toast.error('Failed to create task: ' + res.error);
+      }
+    });
+  };
+
+  const handleDeleteTask = (taskId: string) => {
+    if (!window.confirm('Delete this task?')) return;
+    
+    // Optimistic
+    setTasks(tasks.filter(t => t.id !== taskId));
+    
+    startTransition(async () => {
+      const res = await deleteTask(taskId);
+      if (!res.success) {
+        toast.error('Failed to delete: ' + res.error);
+        setTasks(initialTasks);
+      }
+    });
   };
 
   return (
-    <div className="h-full flex flex-col w-full select-none">
-      <div className="flex-1 overflow-x-auto pb-4 custom-scrollbar">
-        <DragDropContext onDragEnd={onDragEnd}>
-          <div className="flex gap-6 h-full items-start px-2 min-w-max">
-            {COLUMNS.map((status) => (
-              <KanbanColumn
-                key={status}
-                status={status}
-                tasks={getTasksByStatus(status)}
-                onTaskClick={setSelectedTask}
-              />
-            ))}
-          </div>
-        </DragDropContext>
-      </div>
+    <div className="flex-1 flex overflow-x-auto overflow-y-hidden pb-4 gap-6 scrollbar-hide h-full">
+      <DragDropContext onDragEnd={handleDragEnd}>
+        {COLUMNS.map(column => (
+          <div key={column.id} className="flex flex-col w-80 flex-shrink-0 h-full">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className={`w-3 h-3 rounded-full ${column.color}`} />
+                <h3 className="font-bold text-slate-200">{column.title}</h3>
+                <span className="text-xs font-semibold text-slate-500 bg-white/[0.05] px-2 py-0.5 rounded-full">
+                  {tasks.filter(t => t.status === column.id).length}
+                </span>
+              </div>
+              <button 
+                onClick={() => handleCreateTask(column.id)}
+                className="p-1 text-slate-400 hover:text-white hover:bg-white/[0.05] rounded-md transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
 
-      {selectedTask && (
-        <TaskModal
-          task={selectedTask}
-          projectId={projectId}
-          teamMembers={teamMembers}
-          currentUserId={currentUserId}
-          isOpen={!!selectedTask}
-          onClose={() => setSelectedTask(null)}
-        />
-      )}
+            <Droppable droppableId={column.id}>
+              {(provided, snapshot) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className={`flex-1 overflow-y-auto rounded-2xl bg-black/20 border border-white/[0.05] p-3 transition-colors ${
+                    snapshot.isDraggingOver ? 'bg-indigo-500/5 border-indigo-500/20' : ''
+                  }`}
+                >
+                  <div className="space-y-3 min-h-[150px]">
+                    {tasks
+                      .filter(t => t.status === column.id)
+                      .sort((a, b) => a.order_index - b.order_index)
+                      .map((task, index) => (
+                        <Draggable key={task.id} draggableId={task.id} index={index}>
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                              className={`bg-[#12161f] border rounded-xl p-4 cursor-grab active:cursor-grabbing transition-shadow ${
+                                snapshot.isDragging 
+                                  ? 'shadow-2xl shadow-black/50 border-indigo-500/50 scale-[1.02]' 
+                                  : 'border-white/[0.08] hover:border-indigo-500/30 shadow-lg'
+                              }`}
+                            >
+                              <div className="flex items-start justify-between gap-2 mb-2">
+                                <h4 className="text-sm font-semibold text-white leading-snug">{task.title}</h4>
+                                <div className="relative group/menu">
+                                  <button className="text-slate-500 hover:text-white p-0.5">
+                                    <MoreVertical className="w-4 h-4" />
+                                  </button>
+                                  <div className="absolute right-0 top-full mt-1 hidden group-hover/menu:block bg-[#161c28] border border-white/10 rounded-lg shadow-xl z-10 w-28 py-1">
+                                    <button 
+                                      onClick={() => handleDeleteTask(task.id)}
+                                      className="w-full text-left px-3 py-1.5 text-xs text-rose-400 hover:bg-rose-500/10 flex items-center gap-2"
+                                    >
+                                      <Trash2 className="w-3 h-3" /> Delete
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {task.description && (
+                                <p className="text-xs text-slate-500 line-clamp-2 mb-3">{task.description}</p>
+                              )}
+                              
+                              <div className="flex items-center justify-between mt-4">
+                                <div className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${PRIORITY_COLORS[task.priority]}`}>
+                                  {task.priority}
+                                </div>
+                                {task.assignee && (
+                                  <div className="w-6 h-6 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-[10px] text-indigo-400 font-bold" title={task.assignee.full_name}>
+                                    {task.assignee.full_name.charAt(0)}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </Draggable>
+                      ))}
+                    {provided.placeholder}
+                  </div>
+                </div>
+              )}
+            </Droppable>
+          </div>
+        ))}
+      </DragDropContext>
     </div>
   );
 }

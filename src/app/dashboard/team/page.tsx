@@ -1,266 +1,102 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { InviteMemberDialog } from '@/components/team/invite-member-dialog';
-import { TeamMemberCard } from '@/components/team/team-member-card';
-import { Users, Shield, Briefcase, UserCheck, Search } from 'lucide-react';
-import type { TeamMemberItem, ProjectRole } from '@/types/team';
+import { Users, Mail, Phone, Briefcase } from 'lucide-react';
 
 export const metadata = {
-  title: 'Team & Roles | NEXUS',
-  description: 'Manage workspace members, project roles, and invitations.',
+  title: 'Team Directory | NEXUS',
 };
 
-export default async function TeamPage() {
+export default async function GlobalTeamPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect('/login?redirect=/dashboard/team');
-  }
+  if (!user) redirect('/login');
 
-  // 1. Fetch all projects where the user is an owner or member
-  const { data: ownedProjects } = await supabase
-    .from('projects')
-    .select('id, name, color, owner_id')
-    .eq('owner_id', user.id);
-
-  const { data: memberProjectLinks } = await supabase
+  // Fetch all projects the user is part of
+  const { data: myProjects } = await supabase
     .from('project_members')
-    .select('project_id, role, project:projects(id, name, color, owner_id)')
+    .select('project_id')
     .eq('user_id', user.id);
 
-  // Combine unique project list
-  const userProjectsMap = new Map<string, { id: string; name: string; color: string; isOwner: boolean; role: ProjectRole }>();
+  const projectIds = myProjects?.map(p => p.project_id) || [];
 
-  (ownedProjects || []).forEach((p) => {
-    userProjectsMap.set(p.id, {
-      id: p.id,
-      name: p.name,
-      color: p.color,
-      isOwner: true,
-      role: 'OWNER',
-    });
-  });
+  // Fetch all members of these projects to form the "team directory"
+  const { data: teamMembersRaw } = await supabase
+    .from('project_members')
+    .select(`
+      role, project_id,
+      profile:user_id(id, full_name, username, email, bio)
+    `)
+    .in('project_id', projectIds);
 
-  (memberProjectLinks || []).forEach((link) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const p = link.project as any;
-    if (p && !userProjectsMap.has(p.id)) {
-      userProjectsMap.set(p.id, {
-        id: p.id,
-        name: p.name,
-        color: p.color,
-        isOwner: p.owner_id === user.id,
-        role: link.role as ProjectRole,
+  // Deduplicate users (since one user can be in multiple projects)
+  const uniqueMembersMap = new Map();
+  teamMembersRaw?.forEach((m: any) => {
+    if (!uniqueMembersMap.has(m.profile.id)) {
+      uniqueMembersMap.set(m.profile.id, {
+        profile: m.profile,
+        roles: [{ projectId: m.project_id, role: m.role }]
       });
+    } else {
+      const existing = uniqueMembersMap.get(m.profile.id);
+      existing.roles.push({ projectId: m.project_id, role: m.role });
     }
   });
 
-  const accessibleProjectIds = Array.from(userProjectsMap.keys());
-
-  // Projects where current user has management permissions (OWNER or ADMIN)
-  const userManagedProjects = Array.from(userProjectsMap.values()).filter(
-    (p) => p.isOwner || p.role === 'ADMIN'
-  );
-  const userManagedProjectIds = userManagedProjects.map((p) => p.id);
-
-  // 2. Fetch all members across accessible projects
-  const teamMembersMap = new Map<string, TeamMemberItem>();
-
-  if (accessibleProjectIds.length > 0) {
-    // A. Fetch project owners as members
-    const { data: projectOwners } = await supabase
-      .from('projects')
-      .select('id, name, owner_id, owner:profiles!owner_id(id, full_name, username, avatar_url, email)')
-      .in('id', accessibleProjectIds);
-
-    (projectOwners || []).forEach((p) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const ownerProfile = p.owner as any;
-      if (ownerProfile) {
-        const existing = teamMembersMap.get(ownerProfile.id);
-        const projectItem = {
-          projectId: p.id,
-          projectName: p.name,
-          role: 'OWNER' as ProjectRole,
-          isOwner: true,
-        };
-
-        if (existing) {
-          if (!existing.projects.some((pr) => pr.projectId === p.id)) {
-            existing.projects.push(projectItem);
-          }
-          existing.highestRole = 'OWNER';
-        } else {
-          teamMembersMap.set(ownerProfile.id, {
-            userId: ownerProfile.id,
-            fullName: ownerProfile.full_name || 'Anonymous User',
-            username: ownerProfile.username || 'user',
-            email: ownerProfile.email || '',
-            avatarUrl: ownerProfile.avatar_url || '',
-            projects: [projectItem],
-            highestRole: 'OWNER',
-            isOnline: true,
-          });
-        }
-      }
-    });
-
-    // B. Fetch members from project_members
-    const { data: projectMembers } = await supabase
-      .from('project_members')
-      .select('project_id, role, user_id, profile:profiles!user_id(id, full_name, username, avatar_url, email), project:projects(id, name)')
-      .in('project_id', accessibleProjectIds);
-
-    (projectMembers || []).forEach((pm) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const profile = pm.profile as any;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const proj = pm.project as any;
-
-      if (profile && proj) {
-        const existing = teamMembersMap.get(profile.id);
-        const projectItem = {
-          projectId: proj.id,
-          projectName: proj.name,
-          role: pm.role as ProjectRole,
-          isOwner: false,
-        };
-
-        if (existing) {
-          if (!existing.projects.some((pr) => pr.projectId === proj.id)) {
-            existing.projects.push(projectItem);
-          }
-        } else {
-          teamMembersMap.set(profile.id, {
-            userId: profile.id,
-            fullName: profile.full_name || 'Anonymous User',
-            username: profile.username || 'user',
-            email: profile.email || '',
-            avatarUrl: profile.avatar_url || '',
-            projects: [projectItem],
-            highestRole: pm.role as ProjectRole,
-            isOnline: Math.random() > 0.4, // Simulating presence status for display
-          });
-        }
-      }
-    });
-  }
-
-  // If map is empty (e.g. no projects yet), add current user profile
-  if (teamMembersMap.size === 0) {
-    const { data: myProfile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-
-    if (myProfile) {
-      teamMembersMap.set(user.id, {
-        userId: user.id,
-        fullName: myProfile.full_name || user.email?.split('@')[0] || 'User',
-        username: myProfile.username || 'user',
-        email: user.email || '',
-        avatarUrl: myProfile.avatar_url || '',
-        projects: [],
-        highestRole: 'OWNER',
-        isOnline: true,
-      });
-    }
-  }
-
-  const membersList = Array.from(teamMembersMap.values());
-  const totalMembers = membersList.length;
-  const adminCount = membersList.filter((m) => m.highestRole === 'OWNER' || m.highestRole === 'ADMIN').length;
-  const totalProjects = accessibleProjectIds.length;
+  const teamMembers = Array.from(uniqueMembersMap.values());
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto pb-12">
-      {/* Top Banner & Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-1">
-            <Users className="w-4 h-4" />
-            <span>Workspace Collaboration</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            Team &amp; Roles
-          </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Manage your project members, configure role permissions, and invite new teammates.
-          </p>
-        </div>
-
-        <InviteMemberDialog projects={userManagedProjects} />
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <Users className="w-6 h-6 text-indigo-400" />
+          Team Directory
+        </h1>
+        <p className="text-sm text-slate-400 mt-1">
+          Everyone you collaborate with across all your active projects.
+        </p>
       </div>
 
-      {/* Overview Stat Badges */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="glass-panel p-5 rounded-2xl border border-white/[0.08] flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
-            <Users className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-white">{totalMembers}</div>
-            <div className="text-xs text-slate-400">Workspace Members</div>
-          </div>
-        </div>
-
-        <div className="glass-panel p-5 rounded-2xl border border-white/[0.08] flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400">
-            <Shield className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-white">{adminCount}</div>
-            <div className="text-xs text-slate-400">Owners &amp; Admins</div>
-          </div>
-        </div>
-
-        <div className="glass-panel p-5 rounded-2xl border border-white/[0.08] flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
-            <Briefcase className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-white">{totalProjects}</div>
-            <div className="text-xs text-slate-400">Active Shared Projects</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Search & Team Members Grid */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-            <UserCheck className="w-4 h-4 text-indigo-400" />
-            <span>Active Collaborators ({membersList.length})</span>
-          </h2>
-        </div>
-
-        {membersList.length === 0 ? (
-          <div className="glass-panel p-12 rounded-2xl text-center border border-white/[0.08] space-y-4">
-            <div className="w-12 h-12 mx-auto rounded-xl bg-slate-800 flex items-center justify-center text-slate-400">
-              <Users className="w-6 h-6" />
-            </div>
-            <h3 className="text-base font-semibold text-white">No team members found</h3>
-            <p className="text-xs text-slate-400 max-w-sm mx-auto">
-              Start building your team by inviting colleagues to collaborate on your projects.
-            </p>
-            <div className="pt-2">
-              <InviteMemberDialog projects={userManagedProjects} />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        {teamMembers.map((member) => (
+          <div key={member.profile.id} className="glass-panel p-6 rounded-2xl border border-white/[0.08] hover:border-indigo-500/30 transition-colors group">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-20 h-20 rounded-full bg-indigo-500/10 border-2 border-indigo-500/30 flex items-center justify-center text-indigo-400 text-2xl font-bold mb-4 shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform">
+                {member.profile.full_name?.charAt(0) || member.profile.username?.charAt(0) || '?'}
+              </div>
+              <h3 className="text-lg font-bold text-white mb-1">{member.profile.full_name || member.profile.username}</h3>
+              <p className="text-xs text-slate-400 mb-4 h-8 line-clamp-2">
+                {member.profile.bio || 'No bio provided'}
+              </p>
+              
+              <div className="w-full space-y-3">
+                <div className="flex items-center gap-3 text-xs text-slate-300 bg-white/[0.03] p-2 rounded-lg">
+                  <Mail className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                  <span className="truncate">{member.profile.email}</span>
+                </div>
+                
+                <div className="flex items-start gap-3 text-xs text-slate-300 bg-white/[0.03] p-2 rounded-lg">
+                  <Briefcase className="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5" />
+                  <div className="flex flex-col gap-1 items-start">
+                    <span className="text-slate-500 font-semibold mb-1">Shared Projects:</span>
+                    <div className="flex flex-wrap gap-1.5 justify-center">
+                      {member.roles.slice(0, 3).map((r: any, idx: number) => (
+                        <span key={idx} className="bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded text-[10px] font-bold uppercase">
+                          {r.role}
+                        </span>
+                      ))}
+                      {member.roles.length > 3 && (
+                        <span className="bg-white/10 text-slate-400 px-2 py-0.5 rounded text-[10px] font-bold">
+                          +{member.roles.length - 3}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {membersList.map((member) => (
-              <TeamMemberCard
-                key={member.userId}
-                member={member}
-                currentUserId={user.id}
-                userManagedProjectIds={userManagedProjectIds}
-              />
-            ))}
-          </div>
-        )}
+        ))}
       </div>
     </div>
   );

@@ -1,213 +1,129 @@
 'use client';
 
-import React from 'react';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Legend
-} from 'recharts';
-import { Layers, Activity, AlertCircle } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { Lock, TrendingUp } from 'lucide-react';
+import Link from 'next/link';
+import { useTranslation } from '@/context/language-context';
 
-interface ChartDataItem {
-  name: string;
-  value: number;
-  color: string;
-}
+const PRIORITY_COLORS = {
+  LOW: '#94a3b8',
+  MEDIUM: '#60a5fa',
+  HIGH: '#fbbf24',
+  URGENT: '#fb7185',
+};
 
-interface TrendDataItem {
-  name: string;
-  added: number;
-  completed: number;
-}
-
-interface AnalyticsChartsProps {
-  tasksByStatus: ChartDataItem[];
-  tasksByPriority: ChartDataItem[];
-  tasksTrend: TrendDataItem[];
-}
-
-export function AnalyticsCharts({
-  tasksByStatus,
+export function AnalyticsCharts({ 
+  tasksByStatus, 
   tasksByPriority,
-  tasksTrend
-}: AnalyticsChartsProps) {
-  
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-[#12161f]/90 backdrop-blur-md border border-white/[0.08] p-3 rounded-xl shadow-xl">
-          <p className="text-xs font-semibold text-slate-300 mb-2">{label}</p>
-          {payload.map((entry: any, index: number) => (
-            <div key={index} className="flex items-center gap-2 text-xs mb-1">
-              <div 
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: entry.color }}
-              />
-              <span className="text-slate-400 capitalize">{entry.name}:</span>
-              <span className="text-white font-bold">{entry.value}</span>
-            </div>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
-
-  const CustomPieTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="bg-[#12161f]/90 backdrop-blur-md border border-white/[0.08] p-3 rounded-xl shadow-xl flex items-center gap-2">
-          <div 
-            className="w-2.5 h-2.5 rounded-full"
-            style={{ backgroundColor: data.color }}
-          />
-          <span className="text-xs text-slate-300 font-semibold">{data.name}:</span>
-          <span className="text-xs text-white font-bold">{data.value}</span>
-        </div>
-      );
-    }
-    return null;
-  };
+  subscriptionTier
+}: { 
+  tasksByStatus: any[];
+  tasksByPriority: any[];
+  subscriptionTier: 'FREE' | 'PRO';
+}) {
+  const { lang, t } = useTranslation();
 
   return (
     <div className="space-y-6">
-      
-      {/* Top Row: Distribution Charts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        
-        {/* Status Distribution */}
-        <div className="glass-panel p-5 rounded-2xl border border-white/[0.08] relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <Layers className="w-24 h-24 text-indigo-500" />
-          </div>
-          <h3 className="text-sm font-semibold text-slate-300 mb-6 relative z-10 flex items-center gap-2">
-            <Activity className="w-4 h-4 text-indigo-400" />
-            Распределение по статусам
-          </h3>
-          <div className="h-64 relative z-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Status Chart */}
+        <div className="glass-panel p-6 rounded-2xl border border-white/[0.08]">
+          <h3 className="text-lg font-bold text-white mb-6">Task Completion</h3>
+          <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={tasksByStatus}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  paddingAngle={5}
-                  dataKey="value"
-                  stroke="none"
-                >
-                  {tasksByStatus.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip content={<CustomPieTooltip />} cursor={{ fill: 'transparent' }} />
-                <Legend 
-                  verticalAlign="bottom" 
-                  height={36} 
-                  iconType="circle"
-                  wrapperStyle={{ fontSize: '11px', color: '#94a3b8' }}
+              <BarChart data={tasksByStatus}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                <Tooltip 
+                  cursor={{ fill: 'rgba(255,255,255,0.02)' }}
+                  contentStyle={{ backgroundColor: '#12161f', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px' }}
                 />
-              </PieChart>
+                <Bar dataKey="count" fill="#6366f1" radius={[4, 4, 0, 0]} />
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Priority Distribution */}
-        <div className="glass-panel p-5 rounded-2xl border border-white/[0.08] relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <AlertCircle className="w-24 h-24 text-rose-500" />
-          </div>
-          <h3 className="text-sm font-semibold text-slate-300 mb-6 relative z-10 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-rose-400" />
-            Распределение по приоритетам
-          </h3>
-          <div className="h-64 relative z-10">
+        {/* Priority Chart */}
+        <div className="glass-panel p-6 rounded-2xl border border-white/[0.08]">
+          <h3 className="text-lg font-bold text-white mb-6">Priority Distribution</h3>
+          <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={tasksByPriority}
                   cx="50%"
                   cy="50%"
-                  innerRadius={40}
-                  outerRadius={80}
-                  paddingAngle={2}
+                  innerRadius={80}
+                  outerRadius={110}
+                  paddingAngle={5}
                   dataKey="value"
                   stroke="none"
                 >
                   {tasksByPriority.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                    <Cell key={`cell-${index}`} fill={PRIORITY_COLORS[entry.name as keyof typeof PRIORITY_COLORS] || '#6366f1'} />
                   ))}
                 </Pie>
-                <Tooltip content={<CustomPieTooltip />} cursor={{ fill: 'transparent' }} />
-                <Legend 
-                  verticalAlign="bottom" 
-                  height={36} 
-                  iconType="circle"
-                  wrapperStyle={{ fontSize: '11px', color: '#94a3b8' }}
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#12161f', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px' }}
                 />
               </PieChart>
             </ResponsiveContainer>
           </div>
+          {/* Legend */}
+          <div className="flex items-center justify-center gap-6 mt-4">
+            {tasksByPriority.map(entry => (
+              <div key={entry.name} className="flex items-center gap-2 text-xs text-slate-400">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: PRIORITY_COLORS[entry.name as keyof typeof PRIORITY_COLORS] }} />
+                {entry.name} ({entry.value})
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Bottom Row: Trend Chart */}
-      <div className="glass-panel p-5 rounded-2xl border border-white/[0.08]">
-        <h3 className="text-sm font-semibold text-slate-300 mb-6 flex items-center gap-2">
-          <Activity className="w-4 h-4 text-cyan-400" />
-          Динамика задач (Добавлено vs Завершено)
-        </h3>
-        <div className="h-72">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={tasksTrend}
-              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-              <XAxis 
-                dataKey="name" 
-                stroke="#64748b" 
-                fontSize={11}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis 
-                stroke="#64748b" 
-                fontSize={11}
-                tickLine={false}
-                axisLine={false}
-              />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: '#ffffff05' }} />
-              <Legend wrapperStyle={{ fontSize: '11px', color: '#94a3b8', paddingTop: '10px' }} />
-              <Bar 
-                dataKey="added" 
-                name="Добавлено задач" 
-                fill="#3b82f6" 
-                radius={[4, 4, 0, 0]} 
-                barSize={32}
-              />
-              <Bar 
-                dataKey="completed" 
-                name="Завершено задач" 
-                fill="#10b981" 
-                radius={[4, 4, 0, 0]} 
-                barSize={32}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+      {/* Advanced Analytics Locked State */}
+      <div className="relative overflow-hidden glass-panel rounded-2xl border border-indigo-500/20 p-8 sm:p-12 text-center flex flex-col items-center justify-center min-h-[300px]">
+        {subscriptionTier === 'FREE' ? (
+          <>
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-10" />
+            
+            {/* Blurred background mock charts */}
+            <div className="absolute inset-0 opacity-20 pointer-events-none flex items-center justify-center gap-8">
+              <div className="w-1/3 h-40 bg-gradient-to-t from-indigo-500/50 to-transparent rounded-lg" />
+              <div className="w-1/3 h-60 bg-gradient-to-t from-purple-500/50 to-transparent rounded-lg" />
+            </div>
+
+            <div className="relative z-20 flex flex-col items-center max-w-md mx-auto">
+              <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-6 shadow-xl shadow-indigo-500/20">
+                <Lock className="w-8 h-8" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-2">Advanced Analytics</h3>
+              <p className="text-slate-400 text-sm mb-8 leading-relaxed">
+                Unlock deep insights, burndown charts, velocity tracking, and custom exportable reports with NEXUS PRO.
+              </p>
+              <Link
+                href="/dashboard/settings/billing"
+                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-indigo-500/25 flex items-center gap-2"
+              >
+                <TrendingUp className="w-4 h-4" />
+                Upgrade to PRO
+              </Link>
+            </div>
+          </>
+        ) : (
+          <div className="relative z-20 flex flex-col items-center max-w-md mx-auto">
+             <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-6 shadow-xl shadow-emerald-500/20">
+                <TrendingUp className="w-8 h-8" />
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-2">Advanced Analytics</h3>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                Welcome to PRO Analytics. (More advanced charts would be rendered here).
+              </p>
+          </div>
+        )}
       </div>
-      
     </div>
   );
 }

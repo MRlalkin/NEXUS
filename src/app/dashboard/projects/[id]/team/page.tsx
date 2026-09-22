@@ -1,162 +1,89 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { InviteMemberDialog } from '@/components/team/invite-member-dialog';
-import { TeamMemberCard } from '@/components/team/team-member-card';
-import { Users, Shield, UserCheck } from 'lucide-react';
-import type { TeamMemberItem, ProjectRole } from '@/types/team';
-import Link from 'next/link';
+import { Users, UserPlus, Mail, ShieldAlert } from 'lucide-react';
+import { InviteMemberForm } from '@/components/projects/invite-member-form';
 
-export const metadata = {
-  title: 'Project Team | NEXUS',
-  description: 'Manage project members and roles.',
-};
-
-interface ProjectTeamPageProps {
-  params: Promise<{
-    id: string;
-  }>;
-}
-
-export default async function ProjectTeamPage({ params }: ProjectTeamPageProps) {
+export default async function TeamPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect('/login');
-  }
+  if (!user) redirect('/login');
 
-  // 1. Fetch project to verify access and get owner
-  const { data: project, error: projectError } = await supabase
-    .from('projects')
-    .select('id, name, owner_id, owner:profiles!owner_id(id, full_name, username, avatar_url, email)')
-    .eq('id', id)
+  const { data: members } = await supabase
+    .from('project_members')
+    .select(`
+      role, joined_at,
+      profile:user_id(id, full_name, username, email)
+    `)
+    .eq('project_id', id)
+    .order('joined_at', { ascending: true });
+
+  const { data: currentUserMember } = await supabase
+    .from('project_members')
+    .select('role')
+    .eq('project_id', id)
+    .eq('user_id', user.id)
     .single();
 
-  if (projectError || !project) {
-    redirect('/dashboard/projects');
-  }
-
-  // 2. Fetch project members
-  const { data: projectMembers } = await supabase
-    .from('project_members')
-    .select('role, user_id, profile:profiles!user_id(id, full_name, username, avatar_url, email)')
-    .eq('project_id', id);
-
-  const isOwner = project.owner_id === user.id;
-  const memberRecord = projectMembers?.find(m => m.user_id === user.id);
-  const currentUserRole = isOwner ? 'OWNER' : (memberRecord?.role as ProjectRole);
-
-  if (!currentUserRole) {
-    redirect('/dashboard/projects');
-  }
-
-  const canManage = currentUserRole === 'OWNER' || currentUserRole === 'ADMIN';
-  const userManagedProjects = canManage ? [{ id: project.id, name: project.name }] : [];
-
-  const teamMembersMap = new Map<string, TeamMemberItem>();
-
-  // Add owner
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ownerProfile = project.owner as any;
-  if (ownerProfile) {
-    teamMembersMap.set(ownerProfile.id, {
-      userId: ownerProfile.id,
-      fullName: ownerProfile.full_name || 'Anonymous User',
-      username: ownerProfile.username || 'user',
-      email: ownerProfile.email || '',
-      avatarUrl: ownerProfile.avatar_url || '',
-      projects: [{ projectId: project.id, projectName: project.name, role: 'OWNER', isOwner: true }],
-      highestRole: 'OWNER',
-      isOnline: true,
-    });
-  }
-
-  // Add members
-  (projectMembers || []).forEach((pm) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const profile = pm.profile as any;
-    if (profile && !teamMembersMap.has(profile.id)) {
-      teamMembersMap.set(profile.id, {
-        userId: profile.id,
-        fullName: profile.full_name || 'Anonymous User',
-        username: profile.username || 'user',
-        email: profile.email || '',
-        avatarUrl: profile.avatar_url || '',
-        projects: [{ projectId: project.id, projectName: project.name, role: pm.role as ProjectRole, isOwner: false }],
-        highestRole: pm.role as ProjectRole,
-        isOnline: Math.random() > 0.4,
-      });
-    }
-  });
-
-  const membersList = Array.from(teamMembersMap.values());
-  const adminCount = membersList.filter((m) => m.highestRole === 'OWNER' || m.highestRole === 'ADMIN').length;
+  const canInvite = currentUserMember?.role === 'OWNER' || currentUserMember?.role === 'ADMIN';
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto pb-12">
-      {/* Top Banner & Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="h-full w-full p-6 overflow-y-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="lg:col-span-2 space-y-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <Users className="w-5 h-5 text-indigo-400" />
+              Project Members
+            </h2>
+            <span className="text-xs font-semibold text-slate-500 bg-white/[0.05] px-3 py-1 rounded-full">
+              {members?.length || 0} Total
+            </span>
+          </div>
+
+          <div className="glass-panel rounded-2xl border border-white/[0.08] divide-y divide-white/[0.05]">
+            {members?.map((m: any) => (
+              <div key={m.profile.id} className="p-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold">
+                    {m.profile.full_name?.charAt(0) || m.profile.username?.charAt(0) || '?'}
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-white text-sm">{m.profile.full_name || m.profile.username}</h4>
+                    <p className="text-xs text-slate-500">{m.profile.email}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md border 
+                    ${m.role === 'OWNER' ? 'text-rose-400 border-rose-400/20 bg-rose-400/10' : 
+                      m.role === 'ADMIN' ? 'text-amber-400 border-amber-400/20 bg-amber-400/10' : 
+                      'text-blue-400 border-blue-400/20 bg-blue-400/10'}`}>
+                    {m.role}
+                  </span>
+                  {/* Action menu could go here */}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div>
-          <div className="flex items-center gap-2 text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-1">
-            <Link href={`/dashboard/projects/${id}/board`} className="hover:underline text-indigo-300">
-              {project.name}
-            </Link>
-            <span className="text-slate-600">/</span>
-            <Users className="w-4 h-4" />
-            <span>Project Team</span>
+          <div className="glass-panel rounded-2xl border border-white/[0.08] p-6 sticky top-0">
+            <h3 className="text-sm font-bold text-white flex items-center gap-2 mb-4">
+              <UserPlus className="w-4 h-4 text-emerald-400" />
+              Invite Member
+            </h3>
+            
+            {!canInvite ? (
+              <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex gap-2">
+                <ShieldAlert className="w-4 h-4 flex-shrink-0" />
+                <p>You need to be an OWNER or ADMIN to invite new members to this project.</p>
+              </div>
+            ) : (
+              <InviteMemberForm projectId={id} />
+            )}
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            Members &amp; Roles
-          </h1>
-        </div>
-
-        {canManage && (
-          <InviteMemberDialog projects={userManagedProjects} />
-        )}
-      </div>
-
-      {/* Overview Stat Badges */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
-        <div className="glass-panel p-5 rounded-2xl border border-white/[0.08] flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
-            <Users className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-white">{membersList.length}</div>
-            <div className="text-xs text-slate-400">Project Members</div>
-          </div>
-        </div>
-
-        <div className="glass-panel p-5 rounded-2xl border border-white/[0.08] flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400">
-            <Shield className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-white">{adminCount}</div>
-            <div className="text-xs text-slate-400">Owners &amp; Admins</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Search & Team Members Grid */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-            <UserCheck className="w-4 h-4 text-indigo-400" />
-            <span>Active Collaborators</span>
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {membersList.map((member) => (
-            <TeamMemberCard
-              key={member.userId}
-              member={member}
-              currentUserId={user.id}
-              userManagedProjectIds={canManage ? [project.id] : []}
-            />
-          ))}
         </div>
       </div>
     </div>
