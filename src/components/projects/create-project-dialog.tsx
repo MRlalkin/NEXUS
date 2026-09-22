@@ -23,8 +23,11 @@ const COLORS = [
   '#22c55e', // Green
 ];
 
+import { UpgradeModal } from '@/components/billing/upgrade-modal';
+
 export function CreateProjectDialog({ currentProjectCount, subscriptionTier }: CreateProjectDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const { lang, t } = useLanguage();
@@ -38,7 +41,7 @@ export function CreateProjectDialog({ currentProjectCount, subscriptionTier }: C
     e.preventDefault();
     
     if (isLimitReached) {
-      toast.error(t.projects.limitWarningTitle);
+      setShowUpgradeModal(true);
       return;
     }
 
@@ -56,7 +59,11 @@ export function CreateProjectDialog({ currentProjectCount, subscriptionTier }: C
           router.push(`/dashboard/projects/${res.project.id}/board`);
         }
       } else {
-        toast.error(res.error || t.toasts.error);
+        if (res.error === 'LIMIT_REACHED') {
+          setShowUpgradeModal(true);
+        } else {
+          toast.error(res.error || t.toasts.error);
+        }
       }
     });
   };
@@ -102,8 +109,7 @@ export function CreateProjectDialog({ currentProjectCount, subscriptionTier }: C
                   <button
                     type="button"
                     onClick={() => {
-                      setIsOpen(false);
-                      router.push('/dashboard/settings');
+                      setShowUpgradeModal(true);
                     }}
                     className="self-end px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-xs font-bold uppercase tracking-wide transition-colors"
                   >
@@ -111,6 +117,16 @@ export function CreateProjectDialog({ currentProjectCount, subscriptionTier }: C
                   </button>
                 </div>
               ) : null}
+
+              <UpgradeModal 
+                isOpen={showUpgradeModal} 
+                onClose={() => setShowUpgradeModal(false)} 
+                title={lang === 'ru' ? 'Перейдите на NEXUS PRO' : 'Upgrade to NEXUS PRO'}
+                message={lang === 'ru' 
+                  ? 'Вы достигли лимита в 2 проекта. Раскройте полный потенциал вашей команды с расширенными возможностями управления и аналитики.' 
+                  : 'You have reached the limit of 2 projects. Unlock your team\'s full potential with advanced management and analytics capabilities.'
+                }
+              />
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>

@@ -91,10 +91,10 @@ function LoginForm() {
 
         <div className="text-center mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            {t.auth.loginTitle}
+            {t?.auth?.loginTitle ?? 'Log into your account'}
           </h1>
           <p className="text-sm text-slate-400 mt-2">
-            {t.auth.loginSubtitle}
+            {t?.auth?.loginSubtitle ?? 'Enter your credentials'}
           </p>
         </div>
 
@@ -113,7 +113,7 @@ function LoginForm() {
               htmlFor="email" 
               className="block text-xs font-semibold uppercase tracking-wider text-slate-300"
             >
-              {t.auth.email}
+              {t?.auth?.emailLabel ?? 'Email'}
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
@@ -139,14 +139,14 @@ function LoginForm() {
                 htmlFor="password" 
                 className="block text-xs font-semibold uppercase tracking-wider text-slate-300"
               >
-                {t.auth.password}
+                {t?.auth?.passwordLabel ?? 'Password'}
               </label>
               <button
                 type="button"
                 onClick={() => setIsForgotModalOpen(true)}
                 className="text-xs text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
               >
-                {t.auth.forgotPassword}
+                {t?.auth?.forgotPassword ?? 'Forgot password?'}
               </button>
             </div>
             <div className="relative">
@@ -187,7 +187,7 @@ function LoginForm() {
               </>
             ) : (
               <>
-                <span>{t.auth.submitLogin}</span>
+                <span>{t?.auth?.loginButton ?? 'Login'}</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
@@ -197,12 +197,12 @@ function LoginForm() {
         {/* Link to Register */}
         <div className="mt-8 pt-6 text-center border-t border-white/[0.06]">
           <p className="text-sm text-slate-400">
-            {t.auth.noAccount}{' '}
+            {t?.auth?.noAccount ?? "Don't have an account yet?"}{' '}
             <Link
               href="/register"
               className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
             >
-              {t.auth.createAccountLink}
+              {t?.auth?.signUpLink ?? 'Sign up'}
             </Link>
           </p>
         </div>

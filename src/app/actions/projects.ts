@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache';
 export interface CreateProjectResponse {
   success: boolean;
   error?: string;
+  message?: string;
   project?: {
     id: string;
     name: string;
@@ -50,7 +51,11 @@ export async function createProject(formData: FormData): Promise<CreateProjectRe
       }
 
       if (count !== null && count >= 2) {
-        return { success: false, error: 'Достигнут лимит тарифа FREE (максимум 2 проекта). Обновитесь до PRO' };
+        return { 
+          success: false, 
+          error: 'LIMIT_REACHED', 
+          message: 'Вы достигли лимита в 2 проекта на тарифе FREE. Обновитесь до PRO для снятия ограничений.' 
+        };
       }
     }
 

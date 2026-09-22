@@ -149,7 +149,35 @@ export const translations = {
       demoTaskTitle: 'Завершить дизайн',
       demoVelocity: 'Скорость',
     },
+    howItWorks: {
+      badge: "Процесс работы",
+      title: "Управляйте проектами нового поколения",
+      description: "Простой и интуитивный путь от идеи до продакшена",
+      steps: [
+        { step: "01", title: "Создайте проект", desc: "Задайте цели, выберите спринт и организуйте пространство." },
+        { step: "02", title: "Пригласите команду", desc: "Распределяйте задачи и отслеживайте прогресс в реальном времени." },
+        { step: "03", title: "Достигайте результатов", desc: "Используйте аналитику и автоматизацию для быстрого роста." }
+      ]
+    },
     login: 'Войти',
+    auth: {
+      loginTitle: "Вход в аккаунт",
+      loginSubtitle: "Введите свои данные для входа в NEXUS",
+      registerTitle: "Создать аккаунт",
+      registerSubtitle: "Присоединяйтесь к NEXUS и управляйте проектами",
+      nameLabel: "Ваше имя",
+      emailLabel: "Email",
+      passwordLabel: "Пароль",
+      confirmPasswordLabel: "Подтвердите пароль",
+      loginButton: "Войти",
+      registerButton: "Зарегистрироваться",
+      noAccount: "Еще нет аккаунта?",
+      alreadyHaveAccount: "Уже есть аккаунт?",
+      signUpLink: "Зарегистрироваться",
+      signInLink: "Войти",
+      errorRequired: "Заполните все поля",
+      errorMismatch: "Пароли не совпадают"
+    },
     features: { title: 'Возможности', subtitle: '', items: [] as any[] },
     stats: { title: 'Статистика', subtitle: '', items: [] as any[] },
     testimonials: { title: 'Отзывы', subtitle: '', items: [] as any[] },
@@ -309,7 +337,35 @@ export const translations = {
       demoTaskTitle: 'Complete design',
       demoVelocity: 'Velocity',
     },
+    howItWorks: {
+      badge: "Workflow",
+      title: "Manage next-generation projects",
+      description: "A simple and intuitive path from idea to production",
+      steps: [
+        { step: "01", title: "Create a project", desc: "Set goals, choose a sprint, and organize your workspace." },
+        { step: "02", title: "Invite your team", desc: "Assign tasks and track progress in real-time." },
+        { step: "03", title: "Achieve results", desc: "Use analytics and automation for rapid growth." }
+      ]
+    },
     login: 'Login',
+    auth: {
+      loginTitle: "Log into your account",
+      loginSubtitle: "Enter your credentials to login to NEXUS",
+      registerTitle: "Create an account",
+      registerSubtitle: "Join NEXUS and manage your projects",
+      nameLabel: "Your Name",
+      emailLabel: "Email",
+      passwordLabel: "Password",
+      confirmPasswordLabel: "Confirm Password",
+      loginButton: "Login",
+      registerButton: "Register",
+      noAccount: "Don't have an account yet?",
+      alreadyHaveAccount: "Already have an account?",
+      signUpLink: "Sign up",
+      signInLink: "Sign in",
+      errorRequired: "Please fill in all fields",
+      errorMismatch: "Passwords do not match"
+    },
     features: { title: 'Features', subtitle: '', items: [] as any[] },
     stats: { title: 'Stats', subtitle: '', items: [] as any[] },
     testimonials: { title: 'Testimonials', subtitle: '', items: [] as any[] },

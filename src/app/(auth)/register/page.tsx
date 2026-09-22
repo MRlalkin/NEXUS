@@ -79,10 +79,10 @@ export default function RegisterPage() {
 
         <div className="text-center mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            {t.auth.registerTitle}
+            {t?.auth?.registerTitle ?? 'Create an account'}
           </h1>
           <p className="text-sm text-slate-400 mt-2">
-            {t.auth.registerSubtitle}
+            {t?.auth?.registerSubtitle ?? 'Join NEXUS and manage your projects'}
           </p>
         </div>
 
@@ -122,7 +122,7 @@ export default function RegisterPage() {
                   htmlFor="fullName" 
                   className="block text-xs font-semibold uppercase tracking-wider text-slate-300"
                 >
-                  {t.auth.fullName}
+                  {t?.auth?.nameLabel ?? 'Full Name'}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
@@ -146,7 +146,7 @@ export default function RegisterPage() {
                   htmlFor="username" 
                   className="block text-xs font-semibold uppercase tracking-wider text-slate-300"
                 >
-                  {t.auth.username}
+                  {t?.auth?.usernameLabel ?? 'Username'}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
@@ -172,7 +172,7 @@ export default function RegisterPage() {
                   htmlFor="email" 
                   className="block text-xs font-semibold uppercase tracking-wider text-slate-300"
                 >
-                  {t.auth.email}
+                  {t?.auth?.emailLabel ?? 'Email'}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
@@ -197,7 +197,7 @@ export default function RegisterPage() {
                   htmlFor="password" 
                   className="block text-xs font-semibold uppercase tracking-wider text-slate-300"
                 >
-                  {t.auth.password}
+                  {t?.auth?.passwordLabel ?? 'Password'}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
@@ -257,7 +257,7 @@ export default function RegisterPage() {
                   </>
                 ) : (
                   <>
-                    <span>{t.auth.submitRegister}</span>
+                    <span>{t?.auth?.registerButton ?? 'Register'}</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -266,12 +266,13 @@ export default function RegisterPage() {
 
             <div className="mt-8 pt-6 text-center border-t border-white/[0.06]">
               <p className="text-sm text-slate-400">
-                {t.auth.hasAccount}{' '}
+                {t?.auth?.alreadyHaveAccount ?? 'Already have an account?'}
+                {' '}
                 <Link
                   href="/login"
                   className="text-indigo-400 hover:text-indigo-300 font-semibold transition-colors"
                 >
-                  {t.auth.signInLink}
+                  {t?.auth?.signInLink ?? 'Sign in'}
                 </Link>
               </p>
             </div>

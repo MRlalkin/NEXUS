@@ -40,7 +40,7 @@ export function LanguageProvider({ children, initialLang = 'ru' }: { children: R
     }
   };
 
-  const t = translations[lang];
+  const t = translations[lang] || translations.ru;
 
   return (
     <LanguageContext.Provider value={{ lang, setLang, t, isMounted }}>

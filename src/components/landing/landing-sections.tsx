@@ -33,13 +33,13 @@ export function LandingSections() {
         <div className="text-center max-w-3xl mx-auto mb-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#161B22] border border-blue-500/30 text-blue-400 text-xs font-semibold mb-4 shadow-lg shadow-blue-500/10">
             <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-            <span>{t.howItWorks.badge}</span>
+            <span>{t?.howItWorks?.badge ?? "Workflow"}</span>
           </div>
           <h2 className="text-3xl sm:text-5xl font-black text-[#F0F6FC] tracking-tight">
-            {t.howItWorks.title}
+            {t?.howItWorks?.title ?? "How it works"}
           </h2>
           <p className="mt-4 text-sm sm:text-base text-[#8B949E] leading-relaxed">
-            {t.howItWorks.desc}
+            {t?.howItWorks?.desc ?? "Simple and intuitive"}
           </p>
         </div>
 
@@ -56,13 +56,13 @@ export function LandingSections() {
         <div className="text-center max-w-2xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#161B22] border border-white/10 text-[#8B949E] text-xs font-semibold mb-4">
             <Zap className="w-3.5 h-3.5 text-blue-400" />
-            <span>{t.features.badge}</span>
+            <span>{t?.features?.badge ?? "Features"}</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#F0F6FC] tracking-tight">
-            {t.features.title}
+            {t?.features?.title ?? "Key Features"}
           </h2>
           <p className="text-sm text-[#8B949E] mt-3">
-            {t.features.desc}
+            {t?.features?.desc ?? ""}
           </p>
         </div>
 
@@ -73,10 +73,10 @@ export function LandingSections() {
               <Kanban className="w-6 h-6" />
             </div>
             <h3 className="text-lg font-bold text-[#F0F6FC] mb-2">
-              {t.features.card1Title}
+              {t?.features?.card1Title ?? "Project Management"}
             </h3>
             <p className="text-xs sm:text-sm text-[#8B949E] leading-relaxed">
-              {t.features.card1Desc}
+              {t?.features?.card1Desc ?? ""}
             </p>
           </Card3D>
 
@@ -86,10 +86,10 @@ export function LandingSections() {
               <Command className="w-6 h-6" />
             </div>
             <h3 className="text-lg font-bold text-[#F0F6FC] mb-2">
-              {t.features.card2Title}
+              {t?.features?.card2Title ?? "Command Palette"}
             </h3>
             <p className="text-xs sm:text-sm text-[#8B949E] leading-relaxed">
-              {t.features.card2Desc}
+              {t?.features?.card2Desc ?? ""}
             </p>
           </Card3D>
 
@@ -99,10 +99,10 @@ export function LandingSections() {
               <Users className="w-6 h-6" />
             </div>
             <h3 className="text-lg font-bold text-[#F0F6FC] mb-2">
-              {t.features.card3Title}
+              {t?.features?.card3Title ?? "Team Collaboration"}
             </h3>
             <p className="text-xs sm:text-sm text-[#8B949E] leading-relaxed">
-              {t.features.card3Desc}
+              {t?.features?.card3Desc ?? ""}
             </p>
           </Card3D>
 
@@ -112,10 +112,10 @@ export function LandingSections() {
               <BarChart3 className="w-6 h-6" />
             </div>
             <h3 className="text-lg font-bold text-[#F0F6FC] mb-2">
-              {t.features.card4Title}
+              {t?.features?.card4Title ?? "Analytics"}
             </h3>
             <p className="text-xs sm:text-sm text-[#8B949E] leading-relaxed">
-              {t.features.card4Desc}
+              {t?.features?.card4Desc ?? ""}
             </p>
           </Card3D>
 
@@ -125,10 +125,10 @@ export function LandingSections() {
               <Cpu className="w-6 h-6" />
             </div>
             <h3 className="text-lg font-bold text-[#F0F6FC] mb-2">
-              {t.features.card5Title}
+              {t?.features?.card5Title ?? "Automation"}
             </h3>
             <p className="text-xs sm:text-sm text-[#8B949E] leading-relaxed">
-              {t.features.card5Desc}
+              {t?.features?.card5Desc ?? ""}
             </p>
           </Card3D>
 
@@ -138,10 +138,10 @@ export function LandingSections() {
               <ShieldCheck className="w-6 h-6" />
             </div>
             <h3 className="text-lg font-bold text-[#F0F6FC] mb-2">
-              {t.features.card6Title}
+              {t?.features?.card6Title ?? "Security"}
             </h3>
             <p className="text-xs sm:text-sm text-[#8B949E] leading-relaxed">
-              {t.features.card6Desc}
+              {t?.features?.card6Desc ?? ""}
             </p>
           </Card3D>
         </div>
@@ -155,31 +155,31 @@ export function LandingSections() {
           <div className="max-w-2xl space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-400 text-xs font-semibold">
               <Lock className="w-3.5 h-3.5" />
-              <span>{t.security.badge}</span>
+              <span>{t?.security?.badge ?? "Security"}</span>
             </div>
             <h2 className="text-2xl sm:text-4xl font-extrabold text-[#F0F6FC] tracking-tight">
-              {t.security.title}
+              {t?.security?.title ?? "Security & Governance"}
             </h2>
             <p className="text-sm text-[#8B949E] leading-relaxed">
-              {t.security.desc}
+              {t?.security?.desc ?? ""}
             </p>
 
             <div className="pt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-[#F0F6FC]">
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-blue-400" />
-                <span>{t.security.item1}</span>
+                <span>{t?.security?.item1 ?? "Enterprise-grade"}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-blue-400" />
-                <span>{t.security.item2}</span>
+                <span>{t?.security?.item2 ?? "SOC2 Compliant"}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-blue-400" />
-                <span>{t.security.item3}</span>
+                <span>{t?.security?.item3 ?? "SSO & SAML"}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-blue-400" />
-                <span>{t.security.item4}</span>
+                <span>{t?.security?.item4 ?? "Data encryption"}</span>
               </div>
             </div>
           </div>
@@ -192,13 +192,13 @@ export function LandingSections() {
       <section id="pricing" className="relative w-full max-w-7xl mx-auto px-6 py-20 border-t border-white/[0.06]">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#161B22] border border-white/10 text-[#8B949E] text-xs font-semibold mb-4">
-            <span>{t.pricing.badge}</span>
+            <span>{t?.pricing?.badge ?? "Pricing"}</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#F0F6FC] tracking-tight">
-            {t.pricing.title}
+            {t?.pricing?.title ?? "Transparent Pricing"}
           </h2>
           <p className="text-sm text-[#8B949E] mt-3">
-            {t.pricing.desc}
+            {t?.pricing?.desc ?? ""}
           </p>
         </div>
 
@@ -208,17 +208,17 @@ export function LandingSections() {
             <div className="space-y-6">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-[#8B949E]">
-                  {t.pricing.freeSub}
+                  {t?.pricing?.freeSub ?? "Free"}
                 </span>
-                <h3 className="text-2xl font-black text-[#F0F6FC] mt-1">{t.pricing.freeTitle}</h3>
+                <h3 className="text-2xl font-black text-[#F0F6FC] mt-1">{t?.pricing?.freeTitle ?? "Starter"}</h3>
                 <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-4xl font-black text-[#F0F6FC]">{t.pricing.freePrice}</span>
-                  <span className="text-xs text-[#8B949E]">{t.pricing.freePeriod}</span>
+                  <span className="text-4xl font-black text-[#F0F6FC]">{t?.pricing?.freePrice ?? "$0"}</span>
+                  <span className="text-xs text-[#8B949E]">{t?.pricing?.freePeriod ?? "/ month"}</span>
                 </div>
               </div>
 
               <ul className="space-y-3 text-xs text-[#8B949E]">
-                {t.pricing?.features?.map((feat: any, idx: number) => (
+                {t?.pricing?.features?.map((feat: any, idx: number) => (
                   <li key={idx} className="flex items-center gap-2 text-[#F0F6FC]">
                     <Check className="w-4 h-4 text-blue-400" />
                     <span>{feat}</span>
@@ -231,7 +231,7 @@ export function LandingSections() {
               href="/register"
               className="mt-8 w-full py-3 rounded-xl text-center text-xs font-semibold text-[#F0F6FC] bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 transition-colors"
             >
-              {t.pricing.freeCta}
+              {t?.pricing?.freeCta ?? "Start for free"}
             </Link>
           </div>
 
@@ -239,24 +239,24 @@ export function LandingSections() {
           <div className="relative rounded-3xl bg-gradient-to-b from-[#161B22] to-[#0D1117] border border-blue-500/40 p-8 flex flex-col justify-between shadow-2xl shadow-blue-500/10">
             <div className="absolute top-4 right-4">
               <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
-                {t.pricing.proBadge}
+                {t?.pricing?.proBadge ?? "Popular"}
               </span>
             </div>
 
             <div className="space-y-6">
               <div>
                 <span className="text-xs font-bold uppercase tracking-wider text-blue-400">
-                  {t.pricing.proSub}
+                  {t?.pricing?.proSub ?? "Pro"}
                 </span>
-                <h3 className="text-2xl font-black text-[#F0F6FC] mt-1">{t.pricing.proTitle}</h3>
+                <h3 className="text-2xl font-black text-[#F0F6FC] mt-1">{t?.pricing?.proTitle ?? "Professional"}</h3>
                 <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-4xl font-black text-[#F0F6FC]">{t.pricing.proPrice}</span>
-                  <span className="text-xs text-[#8B949E]">{t.pricing.proPeriod}</span>
+                  <span className="text-4xl font-black text-[#F0F6FC]">{t?.pricing?.proPrice ?? "$9"}</span>
+                  <span className="text-xs text-[#8B949E]">{t?.pricing?.proPeriod ?? "/ month"}</span>
                 </div>
               </div>
 
               <ul className="space-y-3 text-xs text-[#8B949E]">
-                {t.pricing?.tiers?.map((feat: any, idx: number) => (
+                {t?.pricing?.tiers?.map((feat: any, idx: number) => (
                   <li key={idx} className="flex items-center gap-2 text-[#F0F6FC]">
                     <Check className="w-4 h-4 text-blue-400" />
                     <span>{feat}</span>
@@ -269,7 +269,7 @@ export function LandingSections() {
               href="/register"
               className="mt-8 w-full py-3 rounded-xl text-center text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-500/25 transition-all"
             >
-              {t.pricing.proCta}
+              {t?.pricing?.proCta ?? "Upgrade to Pro"}
             </Link>
           </div>
         </div>
@@ -282,15 +282,15 @@ export function LandingSections() {
         <div className="text-center max-w-2xl mx-auto mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#161B22] border border-white/10 text-xs text-[#8B949E] mb-3">
             <HelpCircle className="w-3.5 h-3.5 text-blue-400" />
-            <span>{t.faq.badge}</span>
+            <span>{t?.faq?.badge ?? "FAQ"}</span>
           </div>
           <h2 className="text-3xl font-extrabold text-[#F0F6FC]">
-            {t.faq.title}
+            {t?.faq?.title ?? "Frequently Asked Questions"}
           </h2>
         </div>
 
         <div className="space-y-4">
-          {t.faq?.items?.map((item: any, idx: number) => (
+          {t?.faq?.items?.map((item: any, idx: number) => (
             <div
               key={idx}
               className="p-6 rounded-2xl bg-[#0D1117] border border-white/10 space-y-2"
@@ -314,19 +314,19 @@ export function LandingSections() {
           <div className="w-6 h-6 rounded-lg bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
             <Layers className="w-3.5 h-3.5" />
           </div>
-          <span>&copy; {new Date().getFullYear()} {t.footer.copyright}</span>
+          <span>&copy; {new Date().getFullYear()} {t?.footer?.copyright ?? "NEXUS. All rights reserved."}</span>
         </div>
 
         <div className="flex items-center gap-6">
           <span className="flex items-center gap-1.5 text-blue-400">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-            <span>{t.footer.status}</span>
+            <span>{t?.footer?.status ?? "All systems operational"}</span>
           </span>
           <Link href="/login" className="hover:text-[#F0F6FC] transition-colors">
-            {t.footer.login}
+            {t?.footer?.login ?? "Login"}
           </Link>
           <Link href="/register" className="hover:text-[#F0F6FC] transition-colors">
-            {t.footer.register}
+            {t?.footer?.register ?? "Register"}
           </Link>
         </div>
       </footer>
