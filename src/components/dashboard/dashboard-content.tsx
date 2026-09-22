@@ -89,11 +89,7 @@ export function DashboardContent({ displayName, projectCount, unreadNotifs }: Da
           </div>
         </Link>
 
-        {/* Projects Hub Card */}
-        <Link 
-          href="/dashboard/projects"
-          className="glass-panel p-6 rounded-2xl border border-white/[0.08] hover:border-cyan-500/30 hover:scale-[1.01] transition-all group flex flex-col justify-between"
-        >
+        <div className="glass-panel p-6 rounded-2xl border border-white/[0.08] hover:border-cyan-500/30 transition-all flex flex-col justify-between group">
           <div>
             <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 mb-4 group-hover:bg-cyan-500/20 transition-colors">
               <Kanban className="w-6 h-6" />
@@ -103,16 +99,19 @@ export function DashboardContent({ displayName, projectCount, unreadNotifs }: Da
               {t.dashboard.cards.projectsDesc.replace('{count}', String(projectCount))}
             </p>
           </div>
-          <div className="mt-6 flex items-center justify-between">
+          <div className="mt-6 flex flex-col gap-4">
             <div className="flex items-center gap-2 text-xs text-slate-400">
               <Shield className="w-4 h-4 text-emerald-400" />
               <span>{t.dashboard.cards.projectsBadge}</span>
             </div>
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-cyan-400 group-hover:text-cyan-300">
-              <span>{t.dashboard.cards.projectsLink}</span>
-            </div>
+            <Link 
+              href="/dashboard/projects"
+              className="inline-flex justify-center items-center gap-2 w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl transition-all cursor-pointer shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40"
+            >
+              {t.dashboard.cards.projectsLink}
+            </Link>
           </div>
-        </Link>
+        </div>
       </div>
     </div>
   );
