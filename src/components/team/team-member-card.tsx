@@ -37,7 +37,7 @@ export function TeamMemberCard({
   const handleRoleChange = (newRole: ProjectRole) => {
     setIsMenuOpen(false);
     startTransition(async () => {
-      const res = await updateMemberRole(selectedProjectId, member.userId, newRole);
+      const res = await updateMemberRole({ projectId: selectedProjectId, targetUserId: member.userId, newRole });
       if (res.success) {
         toast.success(`Role updated to ${newRole}`);
       } else {
@@ -53,7 +53,7 @@ export function TeamMemberCard({
     }
 
     startTransition(async () => {
-      const res = await removeMember(selectedProjectId, member.userId);
+      const res = await removeMember({ projectId: selectedProjectId, targetUserId: member.userId });
       if (res.success) {
         toast.success(`${member.fullName} removed from project.`);
       } else {

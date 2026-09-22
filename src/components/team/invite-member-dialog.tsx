@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { inviteMember } from '@/app/actions/team';
+import { inviteMemberByEmail } from '@/app/actions/team';
 import { toast } from 'sonner';
 import { 
   UserPlus, 
@@ -42,18 +42,11 @@ export function InviteMemberDialog({ projects }: InviteMemberDialogProps) {
       return;
     }
 
-    const formData = new FormData();
-    formData.append('projectId', projectId);
-    formData.append('email', email);
-    formData.append('role', role);
-
     startTransition(async () => {
-      const res = await inviteMember(formData);
+      const res = await inviteMemberByEmail({ projectId, email, role });
       if (res.success) {
-        toast.success(`Invitation created for ${email}`);
-        if (res.inviteLink) {
-          setInviteLink(res.inviteLink);
-        }
+        toast.success(`Пользователь ${email} успешно добавлен в проект!`);
+        handleClose();
       } else {
         toast.error(res.error || 'Failed to send invitation.');
       }

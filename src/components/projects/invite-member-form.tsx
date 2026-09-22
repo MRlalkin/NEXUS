@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { inviteMember } from '@/app/actions/team';
+import { inviteMemberByEmail } from '@/app/actions/team';
 import { Mail, Send, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/context/language-context';
@@ -14,10 +14,11 @@ export function InviteMemberForm({ projectId }: { projectId: string }) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     formData.append('projectId', projectId);
+    const role = formData.get('role') as string;
     const email = formData.get('email') as string;
 
     startTransition(async () => {
-      const res = await inviteMember(formData);
+      const res = await inviteMemberByEmail({ projectId, email, role });
       if (res.success) {
         toast.success(t.team.inviteSent.replace('{email}', email));
         (e.target as HTMLFormElement).reset();
