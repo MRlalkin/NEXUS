@@ -7,7 +7,8 @@ import {
   LayoutDashboard, 
   Users, 
   Bell, 
-  BarChart3 
+  BarChart3,
+  Kanban
 } from 'lucide-react';
 import { useTranslation } from '@/context/language-context';
 
@@ -17,6 +18,12 @@ const NAV_ITEMS = [
     key: 'dashboard',
     icon: LayoutDashboard,
     exact: true,
+  },
+  {
+    href: '/dashboard/projects',
+    key: 'projects',
+    icon: Kanban,
+    exact: false,
   },
   {
     href: '/dashboard/team',

@@ -86,7 +86,7 @@ export function CommandPalette() {
         title="Open Command Palette (Ctrl+K)"
       >
         <Search className="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-400 transition-colors" />
-        <span className="hidden xl:inline">Search or command...</span>
+        <span className="hidden xl:inline">{lang === 'ru' ? 'Поиск или команда...' : 'Search or command...'}</span>
         <kbd className="pointer-events-none inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-white/[0.06] text-slate-400 border border-white/[0.08]">
           <span className="text-[11px]">⌘</span>K
         </kbd>

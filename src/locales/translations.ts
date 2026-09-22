@@ -141,9 +141,22 @@ export interface Dictionary {
   };
   dashboard: {
     welcome: string;
+    subtitle: string;
     systemStatus: string;
     newProject: string;
     newTask: string;
+    cards: {
+      teamTitle: string;
+      teamDesc: string;
+      teamLink: string;
+      notifTitle: string;
+      notifDesc: string;
+      notifLink: string;
+      projectsTitle: string;
+      projectsDesc: string;
+      projectsBadge: string;
+      projectsLink: string;
+    };
   };
   kanban: {
     columns: {
@@ -343,9 +356,22 @@ export const DICTIONARIES: Record<Language, Dictionary> = {
     },
     dashboard: {
       welcome: "Добро пожаловать,",
+      subtitle: "Управляйте кросс-функциональными проектами, приглашайте участников команды и отслеживайте прогресс.",
       systemStatus: "Система активна",
       newProject: "+ Новый проект",
-      newTask: "+ Создать задачу"
+      newTask: "+ Создать задачу",
+      cards: {
+        teamTitle: "Команда и роли",
+        teamDesc: "Приглашайте коллег через email, управляйте правами RBAC (Owner, Admin, Member, Viewer) и сотрудничайте.",
+        teamLink: "Управление командой",
+        notifTitle: "Уведомления",
+        notifDesc: "Проверяйте приглашения в проекты, назначения задач и уведомления аудита рабочего пространства в реальном времени.",
+        notifLink: "Открыть центр уведомлений",
+        projectsTitle: "Проекты и задачи",
+        projectsDesc: "У вас {count} активных проектов. Отслеживайте прогресс с интерактивными Kanban-досками.",
+        projectsBadge: "RBAC защита активна",
+        projectsLink: "Перейти к проектам →",
+      }
     },
     kanban: {
       columns: {
@@ -543,9 +569,22 @@ export const DICTIONARIES: Record<Language, Dictionary> = {
     },
     dashboard: {
       welcome: "Welcome back,",
+      subtitle: "Manage your cross-functional projects, invite team members with role-based access, and orchestrate delivery.",
       systemStatus: "System Operational",
       newProject: "+ New Project",
-      newTask: "+ Create Task"
+      newTask: "+ Create Task",
+      cards: {
+        teamTitle: "Team & Roles",
+        teamDesc: "Invite colleagues via email, manage RBAC permissions (Owner, Admin, Member, Viewer), and collaborate.",
+        teamLink: "Manage Team",
+        notifTitle: "Notifications",
+        notifDesc: "Check project invitations, task assignments, and workspace audit notifications in real-time.",
+        notifLink: "Open Notification Center",
+        projectsTitle: "Projects & Tasks",
+        projectsDesc: "You have {count} active projects. Track progress with interactive Kanban boards.",
+        projectsBadge: "Role-Based Security Active",
+        projectsLink: "Open Projects →",
+      }
     },
     kanban: {
       columns: {

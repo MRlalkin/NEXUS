@@ -19,10 +19,19 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setIsMounted(true);
     try {
-      const savedLang = localStorage.getItem('nexus_lang') as Language;
+      // First try localStorage
+      let savedLang = localStorage.getItem('nexus_lang') as Language;
+      // If not, try cookie
+      if (!savedLang) {
+        const match = document.cookie.match(new RegExp('(^| )nexus_lang=([^;]+)'));
+        if (match) savedLang = match[2] as Language;
+      }
+      
       if (savedLang === 'ru' || savedLang === 'en') {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setLangState(savedLang);
+        // Ensure cookie is set
+        document.cookie = `nexus_lang=${savedLang}; path=/; max-age=31536000; SameSite=Lax`;
       }
     } catch {
       // ignore
@@ -33,6 +42,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     setLangState(newLang);
     try {
       localStorage.setItem('nexus_lang', newLang);
+      document.cookie = `nexus_lang=${newLang}; path=/; max-age=31536000; SameSite=Lax`;
     } catch {
       // ignore
     }
