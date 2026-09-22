@@ -76,7 +76,7 @@ export default async function ProjectsPage() {
             <Kanban className="w-12 h-12 text-indigo-400/50 mb-4 relative z-10" />
             <h3 className="text-xl font-bold text-white mb-2 relative z-10">У вас пока нет проектов</h3>
             <p className="text-slate-400 text-sm max-w-sm mb-6 relative z-10">
-              Создайте свой первый проект, чтобы начать организовывать задачи, приглашать команду и отслеживать прогресс.
+              Создайте свой первый проект и начните работу.
             </p>
           </div>
         )}
@@ -105,7 +105,7 @@ export default async function ProjectsPage() {
                   
                   <div className="flex flex-col items-end">
                     <span className="text-2xl font-bold text-white leading-none">{progress}%</span>
-                    <span className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mt-1">Completed</span>
+                    <span className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mt-1">Прогресс</span>
                   </div>
                 </div>
 
@@ -134,13 +134,17 @@ export default async function ProjectsPage() {
               
               <div className="flex items-center justify-between text-xs text-slate-500 border-t border-white/[0.05] pt-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1.5 bg-white/[0.04] px-2 py-1 rounded-md">
+                  <div className="flex items-center gap-1.5 bg-white/[0.04] px-2 py-1 rounded-md" title="задач">
                     <CheckSquare className="w-3.5 h-3.5 text-slate-400" />
-                    <span className="font-medium text-slate-300">{doneTasks}/{totalTasks}</span>
+                    <span className="font-medium text-slate-300">{doneTasks}/{totalTasks} задач</span>
                   </div>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5" title="Дедлайн">
                     <Calendar className="w-3.5 h-3.5 text-slate-400" />
                     <span>{new Date(project.created_at).toLocaleDateString()}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5" title="участников">
+                    <UsersIcon className="w-3.5 h-3.5 text-slate-400" />
+                    <span>{project.project_members ? project.project_members.length : 1} участников</span>
                   </div>
                 </div>
               </div>

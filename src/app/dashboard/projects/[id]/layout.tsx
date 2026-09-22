@@ -53,7 +53,7 @@ export default async function ProjectLayout({
           <div>
             <h1 className="text-xl font-bold text-white leading-tight">{project.name}</h1>
             <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-slate-500 font-semibold mt-0.5">
-              <span>Role: {role}</span>
+              <span>Роль: {role}</span>
             </div>
           </div>
         </div>
@@ -62,24 +62,24 @@ export default async function ProjectLayout({
         <nav className="flex items-center gap-6 overflow-x-auto no-scrollbar">
           <Link href={`${basePath}/board`} className="flex items-center gap-2 pb-3 border-b-2 border-indigo-500 text-white font-medium text-sm whitespace-nowrap">
             <Kanban className="w-4 h-4 text-indigo-400" />
-            Board
+            Доска
           </Link>
           <Link href={`${basePath}/tasks`} className="flex items-center gap-2 pb-3 border-b-2 border-transparent text-slate-400 hover:text-white transition-colors text-sm font-medium whitespace-nowrap">
             <CheckSquare className="w-4 h-4" />
-            Tasks
+            Задачи
           </Link>
           <Link href={`${basePath}/team`} className="flex items-center gap-2 pb-3 border-b-2 border-transparent text-slate-400 hover:text-white transition-colors text-sm font-medium whitespace-nowrap">
             <Users className="w-4 h-4" />
-            Team
+            Команда
           </Link>
           <Link href={`${basePath}/activity`} className="flex items-center gap-2 pb-3 border-b-2 border-transparent text-slate-400 hover:text-white transition-colors text-sm font-medium whitespace-nowrap">
             <Activity className="w-4 h-4" />
-            Activity
+            Активность
           </Link>
           {role === 'OWNER' && (
             <Link href={`${basePath}/settings`} className="flex items-center gap-2 pb-3 border-b-2 border-transparent text-slate-400 hover:text-white transition-colors text-sm font-medium whitespace-nowrap">
               <Settings className="w-4 h-4" />
-              Settings
+              Настройки
             </Link>
           )}
         </nav>

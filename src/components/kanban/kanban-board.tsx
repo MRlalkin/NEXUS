@@ -24,11 +24,18 @@ export interface Task {
 }
 
 const COLUMNS: { id: Status; title: string; color: string }[] = [
-  { id: 'TODO', title: 'To Do', color: 'bg-slate-500' },
-  { id: 'IN_PROGRESS', title: 'In Progress', color: 'bg-blue-500' },
-  { id: 'REVIEW', title: 'Review', color: 'bg-amber-500' },
-  { id: 'DONE', title: 'Done', color: 'bg-green-500' },
+  { id: 'TODO', title: 'К выполнению', color: 'bg-slate-500' },
+  { id: 'IN_PROGRESS', title: 'В работе', color: 'bg-blue-500' },
+  { id: 'REVIEW', title: 'На проверке', color: 'bg-amber-500' },
+  { id: 'DONE', title: 'Выполнено', color: 'bg-green-500' },
 ];
+
+const PRIORITY_LABELS: Record<Priority, string> = {
+  LOW: 'Низкий',
+  MEDIUM: 'Средний',
+  HIGH: 'Высокий',
+  URGENT: 'Срочный',
+};
 
 const PRIORITY_COLORS = {
   LOW: 'text-slate-400 bg-slate-400/10 border-slate-400/20',
@@ -83,14 +90,14 @@ export function KanbanBoard({ projectId, initialTasks }: { projectId: string; in
     startTransition(async () => {
       const res = await updateTaskStatus(draggableId, destStatus, destination.index);
       if (!res.success) {
-        toast.error('Failed to move task: ' + res.error);
+        toast.error('Ошибка перемещения задачи: ' + res.error);
         setTasks(initialTasks); // Rollback on error
       }
     });
   };
 
   const handleCreateTask = (status: Status) => {
-    const title = window.prompt('Enter task title:');
+    const title = window.prompt('Название задачи:');
     if (!title) return;
 
     const formData = new FormData();
@@ -101,16 +108,16 @@ export function KanbanBoard({ projectId, initialTasks }: { projectId: string; in
     startTransition(async () => {
       const res = await createTask(formData);
       if (res.success && res.task) {
-        toast.success('Task created');
+        toast.success('Задача создана');
         setTasks([...tasks, res.task as Task]);
       } else {
-        toast.error('Failed to create task: ' + res.error);
+        toast.error('Ошибка создания: ' + res.error);
       }
     });
   };
 
   const handleDeleteTask = (taskId: string) => {
-    if (!window.confirm('Delete this task?')) return;
+    if (!window.confirm('Удалить эту задачу?')) return;
     
     // Optimistic
     setTasks(tasks.filter(t => t.id !== taskId));
@@ -118,7 +125,7 @@ export function KanbanBoard({ projectId, initialTasks }: { projectId: string; in
     startTransition(async () => {
       const res = await deleteTask(taskId);
       if (!res.success) {
-        toast.error('Failed to delete: ' + res.error);
+        toast.error('Ошибка удаления: ' + res.error);
         setTasks(initialTasks);
       }
     });
@@ -140,6 +147,7 @@ export function KanbanBoard({ projectId, initialTasks }: { projectId: string; in
               <button 
                 onClick={() => handleCreateTask(column.id)}
                 className="p-1 text-slate-400 hover:text-white hover:bg-white/[0.05] rounded-md transition-colors"
+                title="+ Добавить задачу"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -182,7 +190,7 @@ export function KanbanBoard({ projectId, initialTasks }: { projectId: string; in
                                       onClick={() => handleDeleteTask(task.id)}
                                       className="w-full text-left px-3 py-1.5 text-xs text-rose-400 hover:bg-rose-500/10 flex items-center gap-2"
                                     >
-                                      <Trash2 className="w-3 h-3" /> Delete
+                                      <Trash2 className="w-3 h-3" /> Удалить
                                     </button>
                                   </div>
                                 </div>
@@ -194,7 +202,7 @@ export function KanbanBoard({ projectId, initialTasks }: { projectId: string; in
                               
                               <div className="flex items-center justify-between mt-4">
                                 <div className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${PRIORITY_COLORS[task.priority]}`}>
-                                  {task.priority}
+                                  {PRIORITY_LABELS[task.priority]}
                                 </div>
                                 {task.assignee && (
                                   <div className="w-6 h-6 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-[10px] text-indigo-400 font-bold" title={task.assignee.full_name}>

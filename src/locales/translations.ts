@@ -344,7 +344,7 @@ export const DICTIONARIES: Record<Language, Dictionary> = {
       forgotPassword: "Забыли пароль?"
     },
     navigation: {
-      dashboard: "Дашборд",
+      dashboard: "Главная",
       projects: "Проекты",
       tasks: "Задачи",
       team: "Команда",
@@ -376,9 +376,9 @@ export const DICTIONARIES: Record<Language, Dictionary> = {
     kanban: {
       columns: {
         todo: "К выполнению",
-        inProgress: "В процессе",
+        inProgress: "В работе",
         inReview: "На проверке",
-        done: "Готово",
+        done: "Выполнено",
       },
       priority: {
         low: "Низкий",

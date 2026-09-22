@@ -49,13 +49,15 @@ export function CreateProjectDialog({ currentProjectCount, subscriptionTier }: C
     startTransition(async () => {
       const res = await createProject(formData);
       if (res.success) {
-        toast.success(lang === 'ru' ? 'Проект создан!' : 'Project created!');
+        toast.success('Проект создан!');
         setIsOpen(false);
+        router.refresh();
+        (e.target as HTMLFormElement).reset();
         if (res.project) {
           router.push(`/dashboard/projects/${res.project.id}/board`);
         }
       } else {
-        toast.error(res.error || (lang === 'ru' ? 'Ошибка создания проекта' : 'Failed to create project'));
+        toast.error(res.error || 'Ошибка создания проекта');
       }
     });
   };
@@ -67,7 +69,7 @@ export function CreateProjectDialog({ currentProjectCount, subscriptionTier }: C
         className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-medium transition-all cursor-pointer shadow-lg shadow-indigo-500/25"
       >
         <Plus className="w-4 h-4" />
-        <span>{lang === 'ru' ? '+ Новый проект' : '+ New Project'}</span>
+        <span>+ Новый проект</span>
       </button>
 
       {isOpen && (
@@ -78,7 +80,7 @@ export function CreateProjectDialog({ currentProjectCount, subscriptionTier }: C
             <div className="flex items-center justify-between p-6 border-b border-white/[0.05]">
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-indigo-400" />
-                {lang === 'ru' ? 'Создание проекта' : 'Create Project'}
+                Создание проекта
               </h2>
               <button 
                 onClick={() => setIsOpen(false)}
@@ -94,9 +96,7 @@ export function CreateProjectDialog({ currentProjectCount, subscriptionTier }: C
                   <div className="flex items-start gap-3 text-rose-400">
                     <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                     <p className="text-sm">
-                      {lang === 'ru' 
-                        ? 'Вы достигли лимита тарифа FREE (максимум 2 проекта). Чтобы создавать больше проектов, обновите тариф до PRO.' 
-                        : 'You have reached the FREE tier limit (max 2 projects). Upgrade to PRO to create unlimited projects.'}
+                      Вы достигли лимита тарифа FREE (максимум 2 проекта). Чтобы создавать больше проектов, обновите тариф до PRO.
                     </p>
                   </div>
                   <button
@@ -107,7 +107,7 @@ export function CreateProjectDialog({ currentProjectCount, subscriptionTier }: C
                     }}
                     className="self-end px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-xs font-bold uppercase tracking-wide transition-colors"
                   >
-                    {lang === 'ru' ? 'Обновить до PRO' : 'Upgrade to PRO'}
+                    Обновить до PRO
                   </button>
                 </div>
               ) : null}
@@ -115,33 +115,45 @@ export function CreateProjectDialog({ currentProjectCount, subscriptionTier }: C
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
-                    {lang === 'ru' ? 'Название проекта' : 'Project Name'} <span className="text-rose-500">*</span>
+                    Название проекта <span className="text-rose-500">*</span>
                   </label>
                   <input
                     name="name"
                     required
                     disabled={isLimitReached}
                     className="w-full px-4 py-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 transition-all placeholder:text-slate-600"
-                    placeholder={lang === 'ru' ? 'Например: Редизайн платформы' : 'e.g. Platform Redesign'}
+                    placeholder="Например: Редизайн платформы"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
-                    {lang === 'ru' ? 'Описание (необязательно)' : 'Description (Optional)'}
+                    Описание (необязательно)
                   </label>
                   <textarea
                     name="description"
                     disabled={isLimitReached}
                     rows={3}
                     className="w-full px-4 py-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 transition-all placeholder:text-slate-600 resize-none"
-                    placeholder={lang === 'ru' ? 'Краткое описание целей...' : 'Brief description of goals...'}
+                    placeholder="Краткое описание целей..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+                    Срок сдачи (дедлайн)
+                  </label>
+                  <input
+                    name="due_date"
+                    type="date"
+                    disabled={isLimitReached}
+                    className="w-full px-4 py-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 transition-all [color-scheme:dark]"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                    {lang === 'ru' ? 'Цветовая метка' : 'Color Label'}
+                    Цвет проекта
                   </label>
                   <div className="flex items-center gap-3">
                     {COLORS.map((c) => (
@@ -165,14 +177,14 @@ export function CreateProjectDialog({ currentProjectCount, subscriptionTier }: C
                     onClick={() => setIsOpen(false)}
                     className="px-4 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/[0.05] transition-colors"
                   >
-                    {lang === 'ru' ? 'Отмена' : 'Cancel'}
+                    Отмена
                   </button>
                   <button
                     type="submit"
                     disabled={isPending || isLimitReached}
                     className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition-all shadow-lg shadow-indigo-500/25 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[120px]"
                   >
-                    {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : (lang === 'ru' ? 'Создать' : 'Create')}
+                    {isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Создание...</> : 'Создать проект'}
                   </button>
                 </div>
               </form>

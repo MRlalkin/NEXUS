@@ -18,6 +18,7 @@ export async function createProject(formData: FormData): Promise<CreateProjectRe
   const name = (formData.get('name') as string)?.trim();
   const description = (formData.get('description') as string)?.trim();
   const color = (formData.get('color') as string) || '#6366f1';
+  const due_date = (formData.get('due_date') as string)?.trim();
 
   if (!name) {
     return { success: false, error: 'Project name is required.' };
@@ -39,6 +40,7 @@ export async function createProject(formData: FormData): Promise<CreateProjectRe
         description: description || null,
         color,
         owner_id: user.id,
+        ...(due_date ? { due_date } : {})
       })
       .select('id, name, color')
       .single();
@@ -47,8 +49,8 @@ export async function createProject(formData: FormData): Promise<CreateProjectRe
       return { success: false, error: insertError.message };
     }
 
-    // Add owner to project_members
-    await supabaseAdmin.from('project_members').insert({
+    // Add owner to project_members using upsert as requested to guarantee ownership
+    await supabaseAdmin.from('project_members').upsert({
       project_id: project.id,
       user_id: user.id,
       role: 'OWNER',
@@ -65,6 +67,7 @@ export async function createProject(formData: FormData): Promise<CreateProjectRe
     });
 
     revalidatePath('/dashboard');
+    revalidatePath('/dashboard/projects');
     revalidatePath('/dashboard/team');
     return { success: true, project };
   } catch (err: unknown) {
