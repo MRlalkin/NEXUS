@@ -12,6 +12,19 @@ export interface TaskActionResponse<T = unknown> {
 }
 
 /**
+ * Helper: check if user is a member of a project
+ */
+async function getProjectMembership(projectId: string, userId: string) {
+  const { data } = await supabaseAdmin
+    .from('project_members')
+    .select('role')
+    .eq('project_id', projectId)
+    .eq('user_id', userId)
+    .single();
+  return data;
+}
+
+/**
  * Create a new task
  */
 export async function createTask(formData: FormData): Promise<TaskActionResponse<TaskItem>> {
@@ -32,6 +45,11 @@ export async function createTask(formData: FormData): Promise<TaskActionResponse
 
     if (!user) {
       return { success: false, error: 'Unauthorized.' };
+    }
+
+    const membership = await getProjectMembership(projectId, user.id);
+    if (!membership) {
+      return { success: false, error: 'Доступ запрещен' };
     }
 
     // Calculate next order_index in 'TODO' column
@@ -79,7 +97,7 @@ export async function createTask(formData: FormData): Promise<TaskActionResponse
       },
     });
 
-    revalidatePath(`/dashboard/projects/${projectId}/board`);
+    revalidatePath(`/dashboard/projects/${projectId}/board`, 'page');
     return { success: true, data: newTask as TaskItem };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Failed to create task.';
@@ -111,6 +129,11 @@ export async function updateTaskStatusAndOrder({
       return { success: false, error: 'Unauthorized.' };
     }
 
+    const membership = await getProjectMembership(projectId, user.id);
+    if (!membership) {
+      return { success: false, error: 'Доступ запрещен' };
+    }
+
     if (updatedTasks && updatedTasks.length > 0) {
       // Batch update updated tasks
       await Promise.all(
@@ -123,7 +146,7 @@ export async function updateTaskStatusAndOrder({
               updated_at: new Date().toISOString(),
             })
             .eq('id', t.id)
-            .eq('project_id', projectId)
+            .eq('project_id', projectId) // ensures tasks belong to project
         )
       );
     } else {
@@ -135,7 +158,7 @@ export async function updateTaskStatusAndOrder({
           updated_at: new Date().toISOString(),
         })
         .eq('id', taskId)
-        .eq('project_id', projectId);
+        .eq('project_id', projectId); // blind updates prevented by project_id check
     }
 
     // Record activity log
@@ -150,7 +173,7 @@ export async function updateTaskStatusAndOrder({
       },
     });
 
-    revalidatePath(`/dashboard/projects/${projectId}/board`);
+    revalidatePath(`/dashboard/projects/${projectId}/board`, 'page');
     return { success: true };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Failed to update task order.';
@@ -174,6 +197,25 @@ export async function deleteTask(taskId: string, projectId: string): Promise<Tas
       return { success: false, error: 'Unauthorized.' };
     }
 
+    const { data: task } = await supabaseAdmin
+      .from('tasks')
+      .select('project_id, creator_id')
+      .eq('id', taskId)
+      .single();
+
+    if (!task || task.project_id !== projectId) {
+      return { success: false, error: 'Task not found or does not belong to this project' };
+    }
+
+    const membership = await getProjectMembership(projectId, user.id);
+
+    const isCreator = task.creator_id === user.id;
+    const isPrivileged = membership?.role === 'OWNER' || membership?.role === 'ADMIN';
+
+    if (!isCreator && !isPrivileged) {
+      return { success: false, error: 'Доступ запрещен' };
+    }
+
     const { error } = await supabaseAdmin
       .from('tasks')
       .delete()
@@ -194,7 +236,7 @@ export async function deleteTask(taskId: string, projectId: string): Promise<Tas
       },
     });
 
-    revalidatePath(`/dashboard/projects/${projectId}/board`);
+    revalidatePath(`/dashboard/projects/${projectId}/board`, 'page');
     return { success: true };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Failed to delete task.';
@@ -216,6 +258,11 @@ export async function updateTaskDetails(
 
     if (!user) {
       return { success: false, error: 'Unauthorized.' };
+    }
+
+    const membership = await getProjectMembership(projectId, user.id);
+    if (!membership) {
+      return { success: false, error: 'Доступ запрещен' };
     }
 
     const { error } = await supabaseAdmin
@@ -242,7 +289,7 @@ export async function updateTaskDetails(
       metadata: { task_id: taskId },
     });
 
-    revalidatePath(`/dashboard/projects/${projectId}/board`);
+    revalidatePath(`/dashboard/projects/${projectId}/board`, 'page');
     return { success: true };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Failed to update task details.';
@@ -274,6 +321,11 @@ export async function addComment({
       return { success: false, error: 'Unauthorized.' };
     }
 
+    const membership = await getProjectMembership(projectId, user.id);
+    if (!membership) {
+      return { success: false, error: 'Доступ запрещен' };
+    }
+
     const { data: comment, error } = await supabaseAdmin
       .from('task_comments')
       .insert({
@@ -295,7 +347,7 @@ export async function addComment({
       metadata: { task_id: taskId, comment_id: comment.id },
     });
 
-    revalidatePath(`/dashboard/projects/${projectId}/board`);
+    revalidatePath(`/dashboard/projects/${projectId}/board`, 'page');
     return { success: true, data: comment };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Failed to add comment.';
@@ -315,6 +367,11 @@ export async function deleteComment(commentId: string, projectId: string): Promi
       return { success: false, error: 'Unauthorized.' };
     }
 
+    const membership = await getProjectMembership(projectId, user.id);
+    if (!membership) {
+      return { success: false, error: 'Доступ запрещен' };
+    }
+
     const { data: comment, error: fetchError } = await supabaseAdmin
       .from('task_comments')
       .select('author_id')
@@ -325,16 +382,8 @@ export async function deleteComment(commentId: string, projectId: string): Promi
       return { success: false, error: fetchError.message };
     }
 
-    // Role check
-    const { data: member } = await supabaseAdmin
-      .from('project_members')
-      .select('role')
-      .eq('project_id', projectId)
-      .eq('user_id', user.id)
-      .single();
-
     const isAuthor = comment.author_id === user.id;
-    const isPrivileged = member?.role === 'OWNER' || member?.role === 'ADMIN';
+    const isPrivileged = membership.role === 'OWNER' || membership.role === 'ADMIN';
 
     if (!isAuthor && !isPrivileged) {
       return { success: false, error: 'Forbidden: You can only delete your own comments.' };
@@ -349,7 +398,7 @@ export async function deleteComment(commentId: string, projectId: string): Promi
       return { success: false, error: deleteError.message };
     }
 
-    revalidatePath(`/dashboard/projects/${projectId}/board`);
+    revalidatePath(`/dashboard/projects/${projectId}/board`, 'page');
     return { success: true };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Failed to delete comment.';

@@ -16,8 +16,8 @@ export async function inviteMember(formData: FormData) {
 
     if (!user) return { success: false, error: 'Unauthorized' };
 
-    // Basic permission check - only OWNER or ADMIN should invite, but we'll rely on RLS or simple logic here
-    const { data: memberCheck } = await supabase
+    // Check if the current user has OWNER or ADMIN role
+    const { data: memberCheck } = await supabaseAdmin
       .from('project_members')
       .select('role')
       .eq('project_id', projectId)
@@ -25,7 +25,7 @@ export async function inviteMember(formData: FormData) {
       .single();
 
     if (!memberCheck || (memberCheck.role !== 'OWNER' && memberCheck.role !== 'ADMIN')) {
-      return { success: false, error: 'Not authorized to invite members' };
+      return { success: false, error: 'Доступ запрещен. Только OWNER или ADMIN могут приглашать участников.' };
     }
 
     // Check if user already exists in platform
@@ -45,7 +45,7 @@ export async function inviteMember(formData: FormData) {
         .single();
 
       if (existingMember) {
-        return { success: false, error: 'User is already a member of this project' };
+        return { success: false, error: 'Пользователь уже является участником проекта.' };
       }
 
       // Add them directly

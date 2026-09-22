@@ -17,8 +17,8 @@ export interface CreateProjectResponse {
 export async function createProject(formData: FormData): Promise<CreateProjectResponse> {
   const name = (formData.get('name') as string)?.trim();
   const description = (formData.get('description') as string)?.trim();
-  const color = (formData.get('color') as string) || '#6366f1';
-  const due_date = (formData.get('due_date') as string)?.trim();
+  const color = (formData.get('color') as string) || '#3b82f6';
+  const deadline = (formData.get('due_date') as string)?.trim() || (formData.get('deadline') as string)?.trim();
 
   if (!name) {
     return { success: false, error: 'Project name is required.' };
@@ -29,46 +29,70 @@ export async function createProject(formData: FormData): Promise<CreateProjectRe
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
-      return { success: false, error: 'Unauthorized.' };
+      return { success: false, error: 'Пользователь не авторизован' };
     }
 
-    // Insert project
-    const { data: project, error: insertError } = await supabaseAdmin
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('subscription_tier')
+      .eq('id', user.id)
+      .single();
+
+    if (profile?.subscription_tier === 'FREE') {
+      const { count, error: countError } = await supabase
+        .from('projects')
+        .select('*', { count: 'exact', head: true })
+        .eq('owner_id', user.id)
+        .eq('is_archived', false);
+
+      if (countError) {
+        return { success: false, error: 'Ошибка при проверке лимита проектов' };
+      }
+
+      if (count !== null && count >= 2) {
+        return { success: false, error: 'Достигнут лимит тарифа FREE (максимум 2 проекта). Обновитесь до PRO' };
+      }
+    }
+
+    const { data: project, error: projError } = await supabase
       .from('projects')
       .insert({
         name,
         description: description || null,
-        color,
+        color: color || '#3b82f6',
+        deadline: deadline || null,
         owner_id: user.id,
-        ...(due_date ? { due_date } : {})
       })
-      .select('id, name, color')
+      .select()
       .single();
 
-    if (insertError) {
-      return { success: false, error: insertError.message };
+    if (projError || !project) {
+      return { success: false, error: projError?.message || 'Ошибка создания проекта' };
     }
 
-    // Add owner to project_members using upsert as requested to guarantee ownership
-    await supabaseAdmin.from('project_members').upsert({
-      project_id: project.id,
-      user_id: user.id,
-      role: 'OWNER',
-    });
+    const { error: memberError } = await supabase
+      .from('project_members')
+      .upsert({
+        project_id: project.id,
+        user_id: user.id,
+        role: 'OWNER'
+      }, { onConflict: 'project_id,user_id' });
 
-    // Record activity log
-    await supabaseAdmin.from('activity_logs').insert({
+    if (memberError) {
+      console.error('Ошибка добавления пользователя в project_members', memberError);
+    }
+
+    await supabase.from('activity_logs').insert({
       project_id: project.id,
       user_id: user.id,
       action: 'CREATED_PROJECT',
-      metadata: {
-        name: project.name,
-      },
+      entity_type: 'PROJECT',
+      entity_id: project.id
     });
 
     revalidatePath('/dashboard');
     revalidatePath('/dashboard/projects');
-    revalidatePath('/dashboard/team');
+
     return { success: true, project };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Failed to create project.';
