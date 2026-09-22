@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
-import { markAsRead, markAllAsRead, deleteNotification } from '@/app/actions/notifications';
+import { markAsRead, deleteNotification } from '@/app/actions/notifications';
 import { toast } from 'sonner';
 import { 
   Bell, 
@@ -47,7 +47,7 @@ export function NotificationsView({ initialNotifications }: NotificationsViewPro
   const handleMarkAll = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
     startTransition(async () => {
-      const res = await markAllAsRead();
+      const res = await markAsRead();
       if (res.success) {
         toast.success('All notifications marked as read.');
       }

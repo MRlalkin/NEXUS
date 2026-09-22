@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { logout } from '@/app/actions/auth';
-import { NotificationsPopover } from '@/components/dashboard/notifications-popover';
+import { NotificationBell } from '@/components/notifications/notification-bell';
 import { DashboardNav } from '@/components/dashboard/dashboard-nav';
 import { CommandPalette } from '@/components/command-palette';
 import { LanguageToggle } from '@/components/ui/language-toggle';
@@ -33,14 +33,6 @@ export default async function DashboardLayout({
     .single();
 
   const displayName = profile?.full_name || profile?.username || 'User';
-
-  // Fetch recent notifications for the bell popover
-  const { data: notifications } = await supabase
-    .from('notifications')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
-    .limit(10);
 
   return (
     <div className="min-h-screen bg-[#07090e] text-slate-100 flex flex-col selection:bg-indigo-500/30 selection:text-indigo-200 bg-grid-pattern">
@@ -78,7 +70,7 @@ export default async function DashboardLayout({
           <div className="flex items-center gap-3">
             <LanguageToggle />
             {/* Notification Bell */}
-            <NotificationsPopover notifications={(notifications || []) as NotificationItem[]} />
+            <NotificationBell userId={user.id} />
 
             {/* Settings Quick Link */}
             <Link
