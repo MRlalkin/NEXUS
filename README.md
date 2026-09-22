@@ -1,81 +1,147 @@
-# NEXUS SaaS Platform
+# ⚡ NEXUS — Next-Gen Spatial SaaS Workspace
 
-Welcome to NEXUS, a cutting-edge "Spatial 3D Cyber-Glass Workspace" built for high-performance teams.
+<p align="center">
+  <a href="https://nexus-lalkin.vercel.app">
+    <img src="https://img.shields.io/badge/Live%20Demo-Vercel-black?style=for-the-badge&logo=vercel" alt="Live Demo" />
+  </a>
+  <img src="https://img.shields.io/badge/Next.js-15.x-black?style=for-the-badge&logo=nextdotjs" alt="Next.js" />
+  <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/Supabase-Database%20%26%20Auth-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
+  <img src="https://img.shields.io/badge/Stripe-Subscriptions-635BFF?style=for-the-badge&logo=stripe&logoColor=white" alt="Stripe" />
+  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License" />
+</p>
 
-## 🏗 Architecture & Tech Stack
-NEXUS is built on a modern, highly scalable stack:
-- **Framework:** Next.js 15 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS (with custom Cyber-Glass UI aesthetics)
-- **Database & Auth:** Supabase (PostgreSQL, Authentication, strict Row Level Security)
-- **Payments:** Stripe SDK for seamless subscription management
-- **Data Visualization:** Recharts for telemetry and analytics
-- **Interactivity:** `@hello-pangea/dnd` for fluid Kanban drag-and-drop
-
-## 🚀 Installation & Local Setup
-
-### 1. Clone the repository
-```bash
-git clone https://github.com/your-org/nexus.git
-cd nexus
-```
-
-### 2. Install dependencies
-```bash
-npm install
-```
-
-### 3. Configure Environment Variables
-Copy the provided example file:
-```bash
-cp .env.example .env.local
-```
-Fill in `.env.local` with your Supabase and Stripe API keys.
-
-### 4. Database Setup (Supabase)
-Apply the SQL schema to your Supabase project. The full schema is located at `supabase/schema.sql` (or run it via the Supabase Dashboard SQL Editor). This includes tables, policies (RLS), and triggers.
-
-### 5. Stripe Webhooks Setup
-To test Stripe payments locally, forward webhook events to your local server:
-```bash
-stripe listen --forward-to localhost:3000/api/webhooks/stripe
-```
-Copy the generated webhook secret and paste it into `.env.local` as `STRIPE_WEBHOOK_SECRET`.
-
-### 6. Run the application
-```bash
-npm run dev
-```
-The app will be available at [http://localhost:3000](http://localhost:3000).
+<p align="center">
+  <b>🌐 <a href="#-english">English</a> | <a href="#-русский">Русский</a></b>
+</p>
 
 ---
 
-## 🧪 Acceptance Testing Scenarios
+## 🇺🇸 English
 
-Please verify the following scenarios to ensure core logic is functioning correctly:
+### 🌟 Overview
+**NEXUS** is a commercial-grade, full-stack SaaS platform designed for high-performance teams, software engineers, and product studios. Built with a spatial cyber-glass dark UI aesthetic, it bridges the gap between Trello, Linear, and Notion with zero interface compromise.
 
-1. **Security & IDOR Protection:**
-   - Attempt to open a project you do not have access to by manually changing the project ID in the URL (`/dashboard/projects/[id]`). Supabase RLS and Server Actions should intercept and redirect you.
-2. **FREE Tier Limits:**
-   - On a `FREE` account, attempt to create a 3rd project. The system should block the creation and display an upgrade prompt.
-3. **Stripe Payments (PRO Tier):**
-   - Upgrade a `FREE` account using the Stripe test card (`4242 4242 4242 4242`). Verify that the `subscription_tier` changes to `PRO` and advanced analytics unlock.
-4. **Kanban Drag-and-Drop:**
-   - Move a task across columns in a project board. Refresh the page to verify the state was synchronously updated in the PostgreSQL database.
-5. **Command Palette:**
-   - Press `Ctrl + K` (or `Cmd + K`) anywhere in the app to open the global search. Test the live project/task search and language switching (RU/EN).
-6. **Admin Isolation:**
-   - Log in as a standard `USER` and attempt to access `/admin`. You should be redirected. Log in as an `ADMIN` to verify access to metrics and user management.
+🔗 **Live Production URL**: [https://nexus-lalkin.vercel.app](https://nexus-lalkin.vercel.app)
+
+### ✨ Core Features
+- **3D Spatial Glassmorphism UI**: High-end dark theme (#0a0c10), multi-layered backdrop blurs, fluid Framer Motion animations.
+- **Real-Time Kanban Board**: Drag-and-drop system powered by `@hello-pangea/dnd` with optimistic UI updates and instant PostgreSQL order synchronization.
+- **Enterprise Multi-Tenant Security**: Strict PostgreSQL Row Level Security (RLS) policies completely eliminating IDOR and cross-tenant data leaks.
+- **Stripe Monetization & Tier Enforcement**: Automated subscription life-cycle (FREE vs PRO), server-side project and task limit verification, webhook event handlers.
+- **Granular RBAC**: 4 access roles per project (OWNER, ADMIN, MEMBER, VIEWER) with customizable permission barriers.
+- **Global Command Palette (`Ctrl + K`)**: Instant keyboard-driven navigation, project switching, and quick task creation.
+- **Interactive Analytics & Audit Trails**: Interactive metrics via Recharts and immutable activity logging (`activity_logs`).
+- **Super-Admin Console**: Dedicated `/admin` suite for tenant oversight, user role elevation, and account moderation.
+
+### 🏗️ Tech Stack
+| Layer | Technologies |
+| :--- | :--- |
+| **Framework** | Next.js 15 (App Router, Server Actions, SSR) |
+| **Language** | TypeScript 5 (Strict Mode) |
+| **Styling** | Tailwind CSS, Framer Motion, Lucide Icons |
+| **Database & Auth** | Supabase (PostgreSQL 15, Auth SSR, Row Level Security) |
+| **Billing** | Stripe (Checkout Sessions, Customer Portal, Webhooks) |
+| **State & Drag-Drop**| `@hello-pangea/dnd`, React Transitions |
+| **Deployment** | Vercel Edge Network |
+
+### 🚀 Getting Started Locally
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/MRlalkin/NEXUS.git
+   cd NEXUS
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Configure Environment Variables**:
+   Copy `.env.example` to `.env.local` and populate it with your credentials:
+   ```bash
+   cp .env.example .env.local
+   ```
+   *You will need keys from [Supabase](https://supabase.com/) and [Stripe](https://stripe.com/).*
+
+4. **Initialize Supabase (Database)**:
+   Ensure you run the schema setup in your Supabase SQL editor using `supabase/schema.sql` (if available) to set up tables, RLS policies, and triggers.
+
+5. **Stripe Webhooks**:
+   To test billing limits locally, run the Stripe CLI:
+   ```bash
+   stripe listen --forward-to localhost:3000/api/webhooks/stripe
+   ```
+
+6. **Run the Development Server**:
+   ```bash
+   npm run dev
+   ```
+   Visit [http://localhost:3000](http://localhost:3000).
 
 ---
 
-## 🔑 Test Accounts
+## 🇷🇺 Русский
 
-You can use the following pre-configured test accounts for evaluation (Password for all accounts: `TestPassword123!` or use Magic Link):
+### 🌟 Обзор
+**NEXUS** — это полнофункциональная SaaS-платформа коммерческого уровня, разработанная для высокопроизводительных команд, инженеров и продуктовых студий. Выполненная в эстетике spatial cyber-glass (многослойное темное стекло), она объединяет лучшие концепции Trello, Linear и Notion без компромиссов в интерфейсе.
 
-- **Admin Account (Full Platform Access):**
-  - `admin@nexus-saas.com`
-- **User A (PRO Subscriber):**
-  - `ivan@nexus-saas.com`
-- **User B (FREE Tier):**
-  - `anna@nexus-saas.com`
+🔗 **Рабочая версия проекта**: [https://nexus-lalkin.vercel.app](https://nexus-lalkin.vercel.app)
+
+### ✨ Основные возможности
+- **3D Spatial Glassmorphism UI**: Премиальная темная тема (#0a0c10), многослойные размытия, плавные анимации через Framer Motion.
+- **Интерактивная Kanban-доска**: Drag-and-drop система на базе `@hello-pangea/dnd` с оптимистичными обновлениями интерфейса и мгновенной синхронизацией сортировки в PostgreSQL.
+- **Enterprise Multi-Tenant Безопасность**: Строгие политики Row Level Security (RLS) в PostgreSQL, полностью исключающие IDOR-уязвимости и утечку данных между воркспейсами.
+- **Монетизация через Stripe**: Автоматизированный жизненный цикл подписок (FREE против PRO), серверная проверка лимитов на проекты и задачи, обработчики вебхуков.
+- **Глубокий RBAC**: 4 уровня доступа на проект (OWNER, ADMIN, MEMBER, VIEWER) с настраиваемыми барьерами разрешений.
+- **Глобальная Command Palette (`Ctrl + K`)**: Мгновенная навигация с клавиатуры, переключение проектов и быстрое создание задач.
+- **Интерактивная аналитика и аудит**: Интерактивные метрики через Recharts и неизменяемое логирование активности (`activity_logs`).
+- **Super-Admin Консоль**: Изолированная панель `/admin` для глобального контроля платформы, управления ролями пользователей и модерации.
+
+### 🏗️ Технологический стек
+| Слой | Технологии |
+| :--- | :--- |
+| **Фреймворк** | Next.js 15 (App Router, Server Actions, SSR) |
+| **Язык** | TypeScript 5 (Строгий режим) |
+| **Стилизация** | Tailwind CSS, Framer Motion, Lucide Icons |
+| **База Данных & Авторизация** | Supabase (PostgreSQL 15, Auth SSR, Row Level Security) |
+| **Биллинг** | Stripe (Checkout Sessions, Customer Portal, Webhooks) |
+| **Состояние & Drag-Drop**| `@hello-pangea/dnd`, React Transitions |
+| **Деплой** | Vercel Edge Network |
+
+### 🚀 Локальный запуск
+
+1. **Клонируйте репозиторий**:
+   ```bash
+   git clone https://github.com/MRlalkin/NEXUS.git
+   cd NEXUS
+   ```
+
+2. **Установите зависимости**:
+   ```bash
+   npm install
+   ```
+
+3. **Настройте переменные окружения**:
+   Скопируйте `.env.example` в `.env.local` и укажите ваши ключи:
+   ```bash
+   cp .env.example .env.local
+   ```
+   *Вам понадобятся ключи от [Supabase](https://supabase.com/) и [Stripe](https://stripe.com/).*
+
+4. **Инициализация БД (Supabase)**:
+   Примените SQL-схему в вашем проекте Supabase через SQL-редактор, используя файл `supabase/schema.sql` (если доступен), чтобы создать таблицы, политики RLS и триггеры.
+
+5. **Настройка Stripe Webhooks**:
+   Для тестирования подписок и биллинга локально, запустите Stripe CLI:
+   ```bash
+   stripe listen --forward-to localhost:3000/api/webhooks/stripe
+   ```
+
+6. **Запуск сервера для разработки**:
+   ```bash
+   npm run dev
+   ```
+   Откройте [http://localhost:3000](http://localhost:3000) в вашем браузере.
