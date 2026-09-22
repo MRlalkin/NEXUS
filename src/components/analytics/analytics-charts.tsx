@@ -5,11 +5,11 @@ import { Lock, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslation } from '@/context/language-context';
 
-const PRIORITY_COLORS = {
-  LOW: '#94a3b8',
-  MEDIUM: '#60a5fa',
-  HIGH: '#fbbf24',
-  URGENT: '#fb7185',
+const PRIORITY_COLORS: Record<string, string> = {
+  'Низкий': '#94a3b8',
+  'Средний': '#60a5fa',
+  'Высокий': '#fbbf24',
+  'Срочный': '#fb7185',
 };
 
 export function AnalyticsCharts({ 
@@ -28,7 +28,7 @@ export function AnalyticsCharts({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Status Chart */}
         <div className="glass-panel p-6 rounded-2xl border border-white/[0.08]">
-          <h3 className="text-lg font-bold text-white mb-6">Task Completion</h3>
+          <h3 className="text-lg font-bold text-white mb-6">Распределение по статусам</h3>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={tasksByStatus}>
@@ -47,7 +47,7 @@ export function AnalyticsCharts({
 
         {/* Priority Chart */}
         <div className="glass-panel p-6 rounded-2xl border border-white/[0.08]">
-          <h3 className="text-lg font-bold text-white mb-6">Priority Distribution</h3>
+          <h3 className="text-lg font-bold text-white mb-6">Задачи по приоритетам</h3>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -99,16 +99,16 @@ export function AnalyticsCharts({
               <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-6 shadow-xl shadow-indigo-500/20">
                 <Lock className="w-8 h-8" />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-2">Advanced Analytics</h3>
+              <h3 className="text-2xl font-bold text-white mb-2">Расширенная аналитика</h3>
               <p className="text-slate-400 text-sm mb-8 leading-relaxed">
-                Unlock deep insights, burndown charts, velocity tracking, and custom exportable reports with NEXUS PRO.
+                Расширенная аналитика доступна на тарифе PRO
               </p>
               <Link
                 href="/dashboard/settings/billing"
                 className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-indigo-500/25 flex items-center gap-2"
               >
                 <TrendingUp className="w-4 h-4" />
-                Upgrade to PRO
+                Перейти на PRO
               </Link>
             </div>
           </>
@@ -117,9 +117,9 @@ export function AnalyticsCharts({
              <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-6 shadow-xl shadow-emerald-500/20">
                 <TrendingUp className="w-8 h-8" />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-2">Advanced Analytics</h3>
+              <h3 className="text-2xl font-bold text-white mb-2">Расширенная аналитика</h3>
               <p className="text-slate-400 text-sm leading-relaxed">
-                Welcome to PRO Analytics. (More advanced charts would be rendered here).
+                Добро пожаловать в PRO аналитику.
               </p>
           </div>
         )}

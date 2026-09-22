@@ -24,17 +24,21 @@ export default async function NotificationsPage() {
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
             <Bell className="w-6 h-6 text-indigo-400" />
-            Notifications
+            Уведомления
           </h1>
           <p className="text-sm text-slate-400 mt-1">
-            Stay updated on your projects and team activities.
+            Следите за активностью в ваших проектах.
           </p>
         </div>
         
         <div className="flex items-center gap-2">
           <button className="flex items-center gap-2 px-3 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 rounded-lg text-sm transition-colors border border-white/[0.05]">
             <CheckCheck className="w-4 h-4 text-emerald-400" />
-            <span>Mark all read</span>
+            <span>Отметить все как прочитанные</span>
+          </button>
+          <button className="flex items-center gap-2 px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg text-sm transition-colors border border-rose-500/20">
+            <Trash2 className="w-4 h-4" />
+            <span>Очистить все</span>
           </button>
         </div>
       </div>
@@ -43,8 +47,8 @@ export default async function NotificationsPage() {
         {notifications?.length === 0 ? (
           <div className="text-center py-12">
             <Bell className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-white">All caught up!</h3>
-            <p className="text-slate-400 text-sm mt-1">You have no new notifications.</p>
+            <h3 className="text-lg font-medium text-white">Все прочитано!</h3>
+            <p className="text-slate-400 text-sm mt-1">У вас нет новых уведомлений.</p>
           </div>
         ) : (
           notifications?.map((notif: any) => (

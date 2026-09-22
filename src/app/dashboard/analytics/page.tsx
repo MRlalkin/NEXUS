@@ -41,17 +41,17 @@ export default async function AnalyticsPage() {
   });
 
   const tasksByStatus = [
-    { name: 'To Do', count: statusCounts.TODO },
-    { name: 'In Progress', count: statusCounts.IN_PROGRESS },
-    { name: 'Review', count: statusCounts.REVIEW },
-    { name: 'Done', count: statusCounts.DONE },
+    { name: 'К выполнению', count: statusCounts.TODO },
+    { name: 'В работе', count: statusCounts.IN_PROGRESS },
+    { name: 'На проверке', count: statusCounts.REVIEW },
+    { name: 'Выполнено', count: statusCounts.DONE },
   ];
 
   const tasksByPriority = [
-    { name: 'LOW', value: priorityCounts.LOW },
-    { name: 'MEDIUM', value: priorityCounts.MEDIUM },
-    { name: 'HIGH', value: priorityCounts.HIGH },
-    { name: 'URGENT', value: priorityCounts.URGENT },
+    { name: 'Низкий', value: priorityCounts.LOW },
+    { name: 'Средний', value: priorityCounts.MEDIUM },
+    { name: 'Высокий', value: priorityCounts.HIGH },
+    { name: 'Срочный', value: priorityCounts.URGENT },
   ].filter(p => p.value > 0);
 
   return (
@@ -59,10 +59,10 @@ export default async function AnalyticsPage() {
       <div>
         <h1 className="text-2xl font-bold text-white flex items-center gap-2">
           <BarChart3 className="w-6 h-6 text-indigo-400" />
-          Analytics Hub
+          Аналитика и отчеты
         </h1>
         <p className="text-sm text-slate-400 mt-1">
-          Insights into your productivity and task distribution.
+          Статистика вашей продуктивности и распределения задач.
         </p>
       </div>
 

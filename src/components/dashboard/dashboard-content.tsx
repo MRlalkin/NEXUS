@@ -15,9 +15,15 @@ interface DashboardContentProps {
   displayName: string;
   projectCount: number;
   unreadNotifs: number;
+  metrics: {
+    tasksInProgress: number;
+    tasksDone: number;
+    upcomingDeadlines: number;
+  };
+  activities: any[];
 }
 
-export function DashboardContent({ displayName, projectCount, unreadNotifs }: DashboardContentProps) {
+export function DashboardContent({ displayName, projectCount, unreadNotifs, metrics, activities }: DashboardContentProps) {
   const { t } = useTranslation();
 
   return (
@@ -40,8 +46,29 @@ export function DashboardContent({ displayName, projectCount, unreadNotifs }: Da
         </div>
       </div>
 
-      {/* Quick Navigation Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      {/* Metrics Row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="glass-panel p-5 rounded-2xl border border-white/[0.08] flex flex-col items-center justify-center text-center">
+          <span className="text-3xl font-bold text-white mb-1">{projectCount}</span>
+          <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Всего проектов</span>
+        </div>
+        <div className="glass-panel p-5 rounded-2xl border border-white/[0.08] flex flex-col items-center justify-center text-center">
+          <span className="text-3xl font-bold text-blue-400 mb-1">{metrics.tasksInProgress}</span>
+          <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Задач в работе</span>
+        </div>
+        <div className="glass-panel p-5 rounded-2xl border border-white/[0.08] flex flex-col items-center justify-center text-center">
+          <span className="text-3xl font-bold text-green-400 mb-1">{metrics.tasksDone}</span>
+          <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Завершено задач</span>
+        </div>
+        <div className="glass-panel p-5 rounded-2xl border border-white/[0.08] flex flex-col items-center justify-center text-center">
+          <span className="text-3xl font-bold text-rose-400 mb-1">{metrics.upcomingDeadlines}</span>
+          <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Ближайшие дедлайны</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Quick Navigation Cards */}
+        <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-5">
         {/* Team & Roles Card */}
         <Link
           href="/dashboard/team"
@@ -110,6 +137,44 @@ export function DashboardContent({ displayName, projectCount, unreadNotifs }: Da
             >
               {t.dashboard.cards.projectsLink}
             </Link>
+          </div>
+          </div>
+        </div>
+        
+        {/* Activity Block */}
+        <div className="glass-panel p-6 rounded-2xl border border-white/[0.08] flex flex-col">
+          <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-indigo-400" />
+            Последняя активность
+          </h3>
+          <div className="flex-1 overflow-y-auto pr-2 space-y-4">
+            {activities.length === 0 ? (
+              <p className="text-sm text-slate-500 text-center mt-10">Событий пока нет</p>
+            ) : (
+              activities.map(activity => {
+                let actionText = activity.action;
+                if (actionText === 'CREATED_PROJECT') actionText = 'создал проект';
+                if (actionText === 'CREATED_TASK') actionText = 'добавил задачу';
+                if (actionText === 'UPDATED_TASK_STATUS') actionText = 'изменил статус';
+                
+                return (
+                  <div key={activity.id} className="flex gap-3 text-sm">
+                    <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold flex-shrink-0">
+                      {(activity.user?.full_name || activity.user?.username || 'U').charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-white">
+                        <span className="font-semibold">{activity.user?.full_name || activity.user?.username}</span>{' '}
+                        <span className="text-slate-400">{actionText}</span>
+                      </p>
+                      <span className="text-xs text-slate-500">
+                        {new Date(activity.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </div>

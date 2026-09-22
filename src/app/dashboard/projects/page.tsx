@@ -30,24 +30,20 @@ export default async function ProjectsPage() {
     .select('id', { count: 'exact', head: true })
     .eq('owner_id', user.id);
 
-  // Fetch projects the user is a member of or owns, including task stats and member counts
+  // Fetch projects the user is a member of or owns, including task stats
   const { data: projects } = await supabase
     .from('projects')
     .select(`
-      id,
-      name,
-      description,
-      color,
-      created_at,
-      project_members!inner(user_id, role),
+      *,
+      project_members (user_id, role),
       tasks (id, status)
     `)
-    .eq('project_members.user_id', user.id)
     .order('created_at', { ascending: false });
 
-  // Deduplicate projects if Supabase inner join returns duplicates (rare but possible depending on RLS)
+  // Deduplicate and filter projects if Supabase inner join returns duplicates or unowned (rare but possible depending on RLS)
+  const userProjects = projects?.filter(p => p.owner_id === user.id || (p.project_members && p.project_members.some((m: any) => m.user_id === user.id))) || [];
   const uniqueProjectsMap = new Map();
-  projects?.forEach(p => uniqueProjectsMap.set(p.id, p));
+  userProjects.forEach(p => uniqueProjectsMap.set(p.id, p));
   const uniqueProjects = Array.from(uniqueProjectsMap.values());
 
   return (
@@ -59,7 +55,7 @@ export default async function ProjectsPage() {
             Мои проекты
           </h1>
           <p className="text-sm text-slate-400 mt-1">
-            Управляйте вашими кросс-функциональными проектами и досками задач.
+            Управление вашими рабочими пространствами и задачами
           </p>
         </div>
         
@@ -74,9 +70,9 @@ export default async function ProjectsPage() {
           <div className="col-span-full py-16 text-center glass-panel rounded-2xl border border-white/[0.08] flex flex-col items-center justify-center relative overflow-hidden">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none" />
             <Kanban className="w-12 h-12 text-indigo-400/50 mb-4 relative z-10" />
-            <h3 className="text-xl font-bold text-white mb-2 relative z-10">У вас пока нет проектов</h3>
+            <h3 className="text-xl font-bold text-white mb-2 relative z-10">Проектов пока нет.</h3>
             <p className="text-slate-400 text-sm max-w-sm mb-6 relative z-10">
-              Создайте свой первый проект и начните работу.
+              Создайте первый проект для начала работы.
             </p>
           </div>
         )}
