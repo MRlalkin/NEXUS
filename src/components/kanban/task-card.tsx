@@ -4,7 +4,7 @@ import React from 'react';
 import { Draggable } from '@hello-pangea/dnd';
 import { TaskItem } from '@/types/kanban';
 import { MessageSquare, Clock } from 'lucide-react';
-import { useTranslation } from '@/context/language-context';
+import { useLanguage } from '@/context/language-context';
 
 interface TaskCardProps {
   task: TaskItem & { comment_count?: number };
@@ -13,7 +13,8 @@ interface TaskCardProps {
 }
 
 export function TaskCard({ task, index, onClick }: TaskCardProps) {
-  const { t } = useTranslation();
+  const { t: typedT } = useLanguage();
+  const t = typedT as any;
 
   const getPriorityColors = (priority: string) => {
     switch (priority) {
@@ -29,8 +30,13 @@ export function TaskCard({ task, index, onClick }: TaskCardProps) {
   };
 
   const getPriorityLabel = (priority: string) => {
-    const key = priority.toLowerCase() as keyof typeof t.kanban.priority;
-    return t.kanban.priority[key] || priority;
+    switch (priority) {
+      case 'LOW': return t.board.priorityLow;
+      case 'MEDIUM': return t.board.priorityMedium;
+      case 'HIGH': return t.board.priorityHigh;
+      case 'URGENT': return t.board.priorityUrgent;
+      default: return priority;
+    }
   };
 
   const isOverdue = task.deadline && new Date(task.deadline) < new Date();
@@ -68,7 +74,7 @@ export function TaskCard({ task, index, onClick }: TaskCardProps) {
                   className={`flex items-center gap-1 ${
                     isOverdue ? 'text-rose-400 font-medium' : ''
                   }`}
-                  title={isOverdue ? t.kanban.overdue : t.kanban.deadline}
+                  title={t.projects.deadline}
                 >
                   <Clock className="w-3.5 h-3.5" />
                   <span>
@@ -95,7 +101,7 @@ export function TaskCard({ task, index, onClick }: TaskCardProps) {
                   title={task.assignee.full_name}
                 />
               ) : (
-                <div className="w-6 h-6 rounded-full bg-white/5 border border-white/10 border-dashed flex items-center justify-center text-[10px]" title="Unassigned">
+                <div className="w-6 h-6 rounded-full bg-white/5 border border-white/10 border-dashed flex items-center justify-center text-[10px]" title={t.board.unassigned}>
                   ?
                 </div>
               )}

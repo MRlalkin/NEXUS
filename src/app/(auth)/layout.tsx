@@ -3,10 +3,11 @@
 import Link from 'next/link';
 import { Layers } from 'lucide-react';
 import { LanguageToggle } from '@/components/ui/language-toggle';
-import { useTranslation } from '@/context/language-context';
+import { useLanguage } from '@/context/language-context';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
-  const { t } = useTranslation();
+  const { t: typedT } = useLanguage();
+  const t = typedT as any;
 
   return (
     <div className="relative min-h-screen w-full flex flex-col justify-between overflow-hidden bg-[#0a0c10] bg-grid-pattern">

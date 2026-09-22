@@ -5,6 +5,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { updateTaskStatus, createTask, deleteTask } from '@/app/actions/kanban';
 import { Plus, MoreVertical, Trash2, Clock, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLanguage } from '@/context/language-context';
 
 export type Priority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 export type Status = 'TODO' | 'IN_PROGRESS' | 'REVIEW' | 'DONE';
@@ -23,19 +24,12 @@ export interface Task {
   } | null;
 }
 
-const COLUMNS: { id: Status; title: string; color: string }[] = [
-  { id: 'TODO', title: 'К выполнению', color: 'bg-slate-500' },
-  { id: 'IN_PROGRESS', title: 'В работе', color: 'bg-blue-500' },
-  { id: 'REVIEW', title: 'На проверке', color: 'bg-amber-500' },
-  { id: 'DONE', title: 'Выполнено', color: 'bg-green-500' },
+const COLUMNS_CONFIG: { id: Status; color: string }[] = [
+  { id: 'TODO', color: 'bg-slate-500' },
+  { id: 'IN_PROGRESS', color: 'bg-blue-500' },
+  { id: 'REVIEW', color: 'bg-amber-500' },
+  { id: 'DONE', color: 'bg-green-500' },
 ];
-
-const PRIORITY_LABELS: Record<Priority, string> = {
-  LOW: 'Низкий',
-  MEDIUM: 'Средний',
-  HIGH: 'Высокий',
-  URGENT: 'Срочный',
-};
 
 const PRIORITY_COLORS = {
   LOW: 'text-slate-400 bg-slate-400/10 border-slate-400/20',
@@ -47,6 +41,27 @@ const PRIORITY_COLORS = {
 export function KanbanBoard({ projectId, initialTasks }: { projectId: string; initialTasks: Task[] }) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [isPending, startTransition] = useTransition();
+  const { t } = useLanguage();
+
+  const getColumnTitle = (id: Status) => {
+    switch (id) {
+      case 'TODO': return t.board.todo;
+      case 'IN_PROGRESS': return t.board.inProgress;
+      case 'REVIEW': return t.board.review;
+      case 'DONE': return t.board.done;
+      default: return id;
+    }
+  };
+
+  const getPriorityLabel = (p: Priority) => {
+    switch (p) {
+      case 'LOW': return t.board.priorityLow;
+      case 'MEDIUM': return t.board.priorityMedium;
+      case 'HIGH': return t.board.priorityHigh;
+      case 'URGENT': return t.board.priorityUrgent;
+      default: return p;
+    }
+  };
 
   const handleDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;
@@ -90,14 +105,14 @@ export function KanbanBoard({ projectId, initialTasks }: { projectId: string; in
     startTransition(async () => {
       const res = await updateTaskStatus(draggableId, destStatus, destination.index);
       if (!res.success) {
-        toast.error('Ошибка перемещения задачи: ' + res.error);
+        toast.error(t.toasts.error + ': ' + res.error);
         setTasks(initialTasks); // Rollback on error
       }
     });
   };
 
   const handleCreateTask = (status: Status) => {
-    const title = window.prompt('Название задачи:');
+    const title = window.prompt(t.board.taskTitlePlaceholder);
     if (!title) return;
 
     const formData = new FormData();
@@ -108,16 +123,16 @@ export function KanbanBoard({ projectId, initialTasks }: { projectId: string; in
     startTransition(async () => {
       const res = await createTask(formData);
       if (res.success && res.task) {
-        toast.success('Задача создана');
+        toast.success(t.toasts.success);
         setTasks([...tasks, res.task as Task]);
       } else {
-        toast.error('Ошибка создания: ' + res.error);
+        toast.error(t.toasts.error + ': ' + res.error);
       }
     });
   };
 
   const handleDeleteTask = (taskId: string) => {
-    if (!window.confirm('Удалить эту задачу?')) return;
+    if (!window.confirm(t.common.delete + '?')) return;
     
     // Optimistic
     setTasks(tasks.filter(t => t.id !== taskId));
@@ -125,7 +140,7 @@ export function KanbanBoard({ projectId, initialTasks }: { projectId: string; in
     startTransition(async () => {
       const res = await deleteTask(taskId);
       if (!res.success) {
-        toast.error('Ошибка удаления: ' + res.error);
+        toast.error(t.toasts.error + ': ' + res.error);
         setTasks(initialTasks);
       }
     });
@@ -134,12 +149,12 @@ export function KanbanBoard({ projectId, initialTasks }: { projectId: string; in
   return (
     <div className="flex-1 flex overflow-x-auto overflow-y-hidden pb-4 gap-6 scrollbar-hide h-full">
       <DragDropContext onDragEnd={handleDragEnd}>
-        {COLUMNS.map(column => (
+        {COLUMNS_CONFIG.map(column => (
           <div key={column.id} className="flex flex-col w-80 flex-shrink-0 h-full">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div className={`w-3 h-3 rounded-full ${column.color}`} />
-                <h3 className="font-bold text-slate-200">{column.title}</h3>
+                <h3 className="font-bold text-slate-200">{getColumnTitle(column.id)}</h3>
                 <span className="text-xs font-semibold text-slate-500 bg-white/[0.05] px-2 py-0.5 rounded-full">
                   {tasks.filter(t => t.status === column.id).length}
                 </span>
@@ -147,7 +162,7 @@ export function KanbanBoard({ projectId, initialTasks }: { projectId: string; in
               <button 
                 onClick={() => handleCreateTask(column.id)}
                 className="p-1 text-slate-400 hover:text-white hover:bg-white/[0.05] rounded-md transition-colors"
-                title="+ Добавить задачу"
+                title={t.board.addTask}
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -190,7 +205,7 @@ export function KanbanBoard({ projectId, initialTasks }: { projectId: string; in
                                       onClick={() => handleDeleteTask(task.id)}
                                       className="w-full text-left px-3 py-1.5 text-xs text-rose-400 hover:bg-rose-500/10 flex items-center gap-2"
                                     >
-                                      <Trash2 className="w-3 h-3" /> Удалить
+                                      <Trash2 className="w-3 h-3" /> {t.common.delete}
                                     </button>
                                   </div>
                                 </div>
@@ -202,7 +217,7 @@ export function KanbanBoard({ projectId, initialTasks }: { projectId: string; in
                               
                               <div className="flex items-center justify-between mt-4">
                                 <div className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${PRIORITY_COLORS[task.priority]}`}>
-                                  {PRIORITY_LABELS[task.priority]}
+                                  {getPriorityLabel(task.priority)}
                                 </div>
                                 {task.assignee && (
                                   <div className="w-6 h-6 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-[10px] text-indigo-400 font-bold" title={task.assignee.full_name}>

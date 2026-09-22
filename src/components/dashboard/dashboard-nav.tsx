@@ -10,7 +10,9 @@ import {
   BarChart3,
   Kanban
 } from 'lucide-react';
-import { useTranslation } from '@/context/language-context';
+import { useLanguage } from '@/context/language-context';
+
+type NavKey = 'dashboard' | 'projects' | 'team' | 'analytics';
 
 const NAV_ITEMS = [
   {
@@ -37,17 +39,11 @@ const NAV_ITEMS = [
     icon: BarChart3,
     exact: false,
   },
-  {
-    href: '/dashboard/notifications',
-    key: 'notifications',
-    icon: Bell,
-    exact: false,
-  },
 ] as const;
 
 export function DashboardNav() {
   const pathname = usePathname();
-  const { t } = useTranslation();
+  const { t } = useLanguage();
 
   return (
     <nav className="flex items-center gap-1.5 p-1 rounded-2xl cyber-glass border border-white/[0.08] shadow-inner">
@@ -67,7 +63,6 @@ export function DashboardNav() {
                 : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.03]'
             }`}
           >
-            {/* Sliding volumetric glow active indicator */}
             {isActive && (
               <motion.div
                 layoutId="activeNavIndicator"
@@ -76,7 +71,7 @@ export function DashboardNav() {
               />
             )}
             <Icon className={`w-4 h-4 relative z-10 ${isActive ? 'text-indigo-400' : 'text-slate-500'}`} />
-            <span className="relative z-10">{t.navigation[item.key]}</span>
+            <span className="relative z-10">{t.nav[item.key as NavKey]}</span>
           </Link>
         );
       })}

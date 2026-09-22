@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import { Toaster } from 'sonner';
 import './globals.css';
 import { Providers } from '@/components/providers';
+import { cookies } from 'next/headers';
+import { AppLanguage } from '@/locales/translations';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -19,15 +21,19 @@ export const metadata: Metadata = {
   description: 'Enterprise-grade project and team management SaaS platform.',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const cookieStore = await cookies();
+  const langCookie = cookieStore.get('nexus_lang')?.value as AppLanguage | undefined;
+  const initialLang = (langCookie === 'ru' || langCookie === 'en') ? langCookie : 'ru';
+
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}>
+    <html lang={initialLang} className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-[#0a0c10] text-slate-100 selection:bg-indigo-500/30 selection:text-indigo-200">
-        <Providers>
+        <Providers initialLang={initialLang}>
           {children}
           <Toaster
             position="top-right"

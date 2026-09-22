@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useTransition } from 'react';
 import { TaskItem, TaskPriority } from '@/types/kanban';
-import { useTranslation } from '@/context/language-context';
+import { useLanguage } from '@/context/language-context';
 import { updateTaskDetails, addComment, deleteComment } from '@/app/actions/tasks';
 import { toast } from 'sonner';
 import { X, Calendar, User, Flag, MessageSquare, Trash2, Send, Loader2 } from 'lucide-react';
@@ -18,7 +18,8 @@ interface TaskModalProps {
 }
 
 export function TaskModal({ task, projectId, teamMembers, currentUserId, isOpen, onClose }: TaskModalProps) {
-  const { t } = useTranslation();
+  const { t: typedT } = useLanguage();
+  const t = typedT as any;
   const [isPending, startTransition] = useTransition();
 
   const [title, setTitle] = useState(task.title);
@@ -74,10 +75,10 @@ export function TaskModal({ task, projectId, teamMembers, currentUserId, isOpen,
       });
 
       if (result.success) {
-        toast.success('Task updated successfully');
+        toast.success(t.toasts.success);
         onClose();
       } else {
-        toast.error(result.error || 'Failed to update task');
+        toast.error(result.error || t.toasts.error);
       }
     });
   };
@@ -96,7 +97,7 @@ export function TaskModal({ task, projectId, teamMembers, currentUserId, isOpen,
       setComments((prev) => [...prev, result.data]);
       setNewComment('');
     } else {
-      toast.error(result.error || 'Failed to add comment');
+      toast.error(result.error || t.toasts.error);
     }
   };
 
@@ -105,7 +106,7 @@ export function TaskModal({ task, projectId, teamMembers, currentUserId, isOpen,
     if (result.success) {
       setComments((prev) => prev.filter((c) => c.id !== commentId));
     } else {
-      toast.error(result.error || 'Failed to delete comment');
+      toast.error(result.error || t.toasts.error);
     }
   };
 
@@ -124,7 +125,7 @@ export function TaskModal({ task, projectId, teamMembers, currentUserId, isOpen,
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="bg-transparent border-none outline-none text-xl font-bold text-[#F0F6FC] placeholder:text-slate-600 focus:ring-0 p-0"
-              placeholder={t.kanban.taskTitlePlaceholder}
+              placeholder={t.board.taskTitlePlaceholder}
             />
           </div>
           <button
@@ -142,12 +143,12 @@ export function TaskModal({ task, projectId, teamMembers, currentUserId, isOpen,
           <div className="md:col-span-2 space-y-6">
             <div className="space-y-2">
               <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                {t.kanban.description}
+                {t.projects.projectDescription}
               </label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Add a more detailed description... (Markdown supported)"
+                placeholder="..."
                 className="w-full h-40 bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-slate-300 placeholder:text-slate-600 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 resize-y transition-all"
               />
             </div>
@@ -156,7 +157,7 @@ export function TaskModal({ task, projectId, teamMembers, currentUserId, isOpen,
             <div className="space-y-4 pt-4 border-t border-white/10">
               <div className="flex items-center gap-2 text-slate-300">
                 <MessageSquare className="w-4 h-4" />
-                <h4 className="font-semibold">{t.kanban.comments}</h4>
+                <h4 className="font-semibold">{t.board.comments}</h4>
               </div>
 
               <div className="space-y-4">
@@ -181,7 +182,7 @@ export function TaskModal({ task, projectId, teamMembers, currentUserId, isOpen,
                           <button
                             onClick={() => handleDeleteComment(comment.id)}
                             className="text-slate-500 hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                            title={t.kanban.delete}
+                            title={t.common.delete}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -200,7 +201,7 @@ export function TaskModal({ task, projectId, teamMembers, currentUserId, isOpen,
                   <textarea
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
-                    placeholder={t.kanban.addCommentPlaceholder}
+                    placeholder="..."
                     className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-slate-300 placeholder:text-slate-600 focus:outline-none focus:border-blue-500/50 resize-none h-[60px]"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
@@ -226,31 +227,31 @@ export function TaskModal({ task, projectId, teamMembers, currentUserId, isOpen,
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
                 <Flag className="w-3.5 h-3.5" />
-                Priority
+                {t.board.priority}
               </label>
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as TaskPriority)}
                 className="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 text-sm text-slate-300 focus:outline-none focus:border-blue-500/50"
               >
-                <option value="LOW">{t.kanban.priority.low}</option>
-                <option value="MEDIUM">{t.kanban.priority.medium}</option>
-                <option value="HIGH">{t.kanban.priority.high}</option>
-                <option value="URGENT">{t.kanban.priority.urgent}</option>
+                <option value="LOW">{t.board.priorityLow}</option>
+                <option value="MEDIUM">{t.board.priorityMedium}</option>
+                <option value="HIGH">{t.board.priorityHigh}</option>
+                <option value="URGENT">{t.board.priorityUrgent}</option>
               </select>
             </div>
 
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
                 <User className="w-3.5 h-3.5" />
-                {t.kanban.assignee}
+                {t.board.assignee}
               </label>
               <select
                 value={assigneeId || ''}
                 onChange={(e) => setAssigneeId(e.target.value || null)}
                 className="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 text-sm text-slate-300 focus:outline-none focus:border-blue-500/50"
               >
-                <option value="">Unassigned</option>
+                <option value="">{t.board.unassigned}</option>
                 {teamMembers.map((member) => (
                   <option key={member.userId} value={member.userId}>
                     {member.fullName}
@@ -262,7 +263,7 @@ export function TaskModal({ task, projectId, teamMembers, currentUserId, isOpen,
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
                 <Calendar className="w-3.5 h-3.5" />
-                {t.kanban.deadline}
+                {t.projects.deadline}
               </label>
               <input
                 type="date"
@@ -279,7 +280,7 @@ export function TaskModal({ task, projectId, teamMembers, currentUserId, isOpen,
                 className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-colors disabled:opacity-60"
               >
                 {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-                {t.kanban.save}
+                {t.common.save}
               </button>
             </div>
           </div>

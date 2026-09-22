@@ -18,7 +18,7 @@ import {
   Command, 
   Globe 
 } from 'lucide-react';
-import { useTranslation as useLanguage } from '@/context/language-context';
+import { useLanguage as useLanguage } from '@/context/language-context';
 
 const SOCIAL_PROOF_AVATARS = [
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
@@ -28,7 +28,8 @@ const SOCIAL_PROOF_AVATARS = [
 ];
 
 export function CinematicHero() {
-  const { lang, setLanguage, t } = useLanguage();
+  const { lang, setLang, t: typedT } = useLanguage();
+  const t = typedT as any;
   const videoRef = useRef<HTMLVideoElement>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showreelOpen, setShowreelOpen] = useState(false);
@@ -99,7 +100,7 @@ export function CinematicHero() {
             <div className="flex items-center gap-1 p-1 rounded-full bg-[#161B22] border border-white/10 shadow-inner">
               <Globe className="w-3.5 h-3.5 text-[#8B949E] ml-1.5 mr-0.5" />
               <button
-                onClick={() => setLanguage('ru')}
+                onClick={() => setLang('ru')}
                 className={`px-2 py-0.5 rounded-full text-xs font-bold transition-all ${
                   lang === 'ru'
                     ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30'
@@ -110,7 +111,7 @@ export function CinematicHero() {
                 RU
               </button>
               <button
-                onClick={() => setLanguage('en')}
+                onClick={() => setLang('en')}
                 className={`px-2 py-0.5 rounded-full text-xs font-bold transition-all ${
                   lang === 'en'
                     ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30'
@@ -144,7 +145,7 @@ export function CinematicHero() {
           <div className="flex sm:hidden items-center gap-2">
             <div className="flex items-center p-0.5 rounded-full bg-[#161B22] border border-white/10 text-xs">
               <button
-                onClick={() => setLanguage(lang === 'ru' ? 'en' : 'ru')}
+                onClick={() => setLang(lang === 'ru' ? 'en' : 'ru')}
                 className="px-2 py-0.5 font-bold text-blue-400"
               >
                 {lang.toUpperCase()}
@@ -175,7 +176,7 @@ export function CinematicHero() {
                 <span className="text-xs text-[#8B949E]">Язык интерфейса / Language</span>
                 <div className="flex items-center gap-1 p-1 rounded-full bg-[#161B22] border border-white/10">
                   <button
-                    onClick={() => setLanguage('ru')}
+                    onClick={() => setLang('ru')}
                     className={`px-3 py-1 rounded-full text-xs font-bold ${
                       lang === 'ru' ? 'bg-blue-600 text-white' : 'text-[#8B949E]'
                     }`}
@@ -183,7 +184,7 @@ export function CinematicHero() {
                     RU
                   </button>
                   <button
-                    onClick={() => setLanguage('en')}
+                    onClick={() => setLang('en')}
                     className={`px-3 py-1 rounded-full text-xs font-bold ${
                       lang === 'en' ? 'bg-blue-600 text-white' : 'text-[#8B949E]'
                     }`}

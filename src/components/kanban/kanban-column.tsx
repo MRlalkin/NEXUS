@@ -4,7 +4,7 @@ import React from 'react';
 import { Droppable } from '@hello-pangea/dnd';
 import { TaskItem, TaskStatus } from '@/types/kanban';
 import { TaskCard } from './task-card';
-import { useTranslation } from '@/context/language-context';
+import { useLanguage } from '@/context/language-context';
 
 interface KanbanColumnProps {
   status: TaskStatus;
@@ -13,7 +13,8 @@ interface KanbanColumnProps {
 }
 
 export function KanbanColumn({ status, tasks, onTaskClick }: KanbanColumnProps) {
-  const { t } = useTranslation();
+  const { t: typedT } = useLanguage();
+  const t = typedT as any;
 
   const getColumnTitle = (status: TaskStatus) => {
     switch (status) {

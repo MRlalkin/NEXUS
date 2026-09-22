@@ -9,7 +9,7 @@ import {
   Kanban, 
   Sparkles 
 } from 'lucide-react';
-import { useTranslation } from '@/context/language-context';
+import { useLanguage } from '@/context/language-context';
 
 interface DashboardContentProps {
   displayName: string;
@@ -24,7 +24,8 @@ interface DashboardContentProps {
 }
 
 export function DashboardContent({ displayName, projectCount, unreadNotifs, metrics, activities }: DashboardContentProps) {
-  const { t } = useTranslation();
+  const { t: typedT } = useLanguage();
+  const t = typedT as any;
 
   return (
     <div className="space-y-8">
@@ -50,19 +51,19 @@ export function DashboardContent({ displayName, projectCount, unreadNotifs, metr
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="glass-panel p-5 rounded-2xl border border-white/[0.08] flex flex-col items-center justify-center text-center">
           <span className="text-3xl font-bold text-white mb-1">{projectCount}</span>
-          <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Всего проектов</span>
+          <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">{t.dashboard.metrics.totalProjects}</span>
         </div>
         <div className="glass-panel p-5 rounded-2xl border border-white/[0.08] flex flex-col items-center justify-center text-center">
           <span className="text-3xl font-bold text-blue-400 mb-1">{metrics.tasksInProgress}</span>
-          <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Задач в работе</span>
+          <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">{t.dashboard.metrics.tasksInProgress}</span>
         </div>
         <div className="glass-panel p-5 rounded-2xl border border-white/[0.08] flex flex-col items-center justify-center text-center">
           <span className="text-3xl font-bold text-green-400 mb-1">{metrics.tasksDone}</span>
-          <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Завершено задач</span>
+          <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">{t.dashboard.metrics.tasksDone}</span>
         </div>
         <div className="glass-panel p-5 rounded-2xl border border-white/[0.08] flex flex-col items-center justify-center text-center">
           <span className="text-3xl font-bold text-rose-400 mb-1">{metrics.upcomingDeadlines}</span>
-          <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Ближайшие дедлайны</span>
+          <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">{t.dashboard.metrics.upcomingDeadlines}</span>
         </div>
       </div>
 
@@ -101,7 +102,7 @@ export function DashboardContent({ displayName, projectCount, unreadNotifs, metr
               </div>
               {unreadNotifs > 0 && (
                 <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-indigo-600 text-white">
-                  {unreadNotifs} new
+                  {unreadNotifs}
                 </span>
               )}
             </div>
@@ -145,17 +146,17 @@ export function DashboardContent({ displayName, projectCount, unreadNotifs, metr
         <div className="glass-panel p-6 rounded-2xl border border-white/[0.08] flex flex-col">
           <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-indigo-400" />
-            Последняя активность
+            {t.dashboard.activity.title}
           </h3>
           <div className="flex-1 overflow-y-auto pr-2 space-y-4">
             {activities.length === 0 ? (
-              <p className="text-sm text-slate-500 text-center mt-10">Событий пока нет</p>
+              <p className="text-sm text-slate-500 text-center mt-10">{t.dashboard.activity.empty}</p>
             ) : (
               activities.map(activity => {
                 let actionText = activity.action;
-                if (actionText === 'CREATED_PROJECT') actionText = 'создал проект';
-                if (actionText === 'CREATED_TASK') actionText = 'добавил задачу';
-                if (actionText === 'UPDATED_TASK_STATUS') actionText = 'изменил статус';
+                if (actionText === 'CREATED_PROJECT') actionText = t.dashboard.activity.createdProject;
+                if (actionText === 'CREATED_TASK') actionText = t.dashboard.activity.createdTask;
+                if (actionText === 'UPDATED_TASK_STATUS') actionText = t.dashboard.activity.updatedTask;
                 
                 return (
                   <div key={activity.id} className="flex gap-3 text-sm">

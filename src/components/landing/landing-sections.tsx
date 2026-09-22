@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useTranslation } from '@/context/language-context';
+import { useLanguage } from '@/context/language-context';
 import { OrbitHero } from './orbit-hero';
 import { Card3D } from '@/components/ui/card-3d';
 import { 
@@ -21,7 +21,8 @@ import {
 } from 'lucide-react';
 
 export function LandingSections() {
-  const { t } = useTranslation();
+  const { t: typedT } = useLanguage();
+  const t = typedT as any;
 
   return (
     <>
@@ -217,7 +218,7 @@ export function LandingSections() {
               </div>
 
               <ul className="space-y-3 text-xs text-[#8B949E]">
-                {t.pricing.freeFeatures.map((feat, idx) => (
+                {t.pricing?.features?.map((feat: any, idx: number) => (
                   <li key={idx} className="flex items-center gap-2 text-[#F0F6FC]">
                     <Check className="w-4 h-4 text-blue-400" />
                     <span>{feat}</span>
@@ -255,7 +256,7 @@ export function LandingSections() {
               </div>
 
               <ul className="space-y-3 text-xs text-[#8B949E]">
-                {t.pricing.proFeatures.map((feat, idx) => (
+                {t.pricing?.tiers?.map((feat: any, idx: number) => (
                   <li key={idx} className="flex items-center gap-2 text-[#F0F6FC]">
                     <Check className="w-4 h-4 text-blue-400" />
                     <span>{feat}</span>
@@ -289,7 +290,7 @@ export function LandingSections() {
         </div>
 
         <div className="space-y-4">
-          {t.faq.items.map((item, idx) => (
+          {t.faq?.items?.map((item: any, idx: number) => (
             <div
               key={idx}
               className="p-6 rounded-2xl bg-[#0D1117] border border-white/10 space-y-2"

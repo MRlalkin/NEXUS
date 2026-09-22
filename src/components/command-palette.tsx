@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Command } from 'cmdk';
 import { searchEntities, type SearchResultProject, type SearchResultTask } from '@/app/actions/search';
 import { logout } from '@/app/actions/auth';
-import { useTranslation } from '@/context/language-context';
+import { useLanguage } from '@/context/language-context';
 import { 
   Search, 
   LayoutDashboard, 
@@ -31,7 +31,8 @@ export function CommandPalette() {
   }>({ projects: [], tasks: [] });
 
   const router = useRouter();
-  const { lang, setLanguage, t } = useTranslation();
+  const { lang, setLang, t: typedT } = useLanguage();
+  const t = typedT as any;
 
   // Listen for Ctrl+K / Cmd+K
   useEffect(() => {
@@ -74,7 +75,7 @@ export function CommandPalette() {
   };
 
   const handleToggleLanguage = () => {
-    setLanguage(lang === 'ru' ? 'en' : 'ru');
+    setLang(lang === 'ru' ? 'en' : 'ru');
   };
 
   return (
@@ -86,7 +87,7 @@ export function CommandPalette() {
         title="Open Command Palette (Ctrl+K)"
       >
         <Search className="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-400 transition-colors" />
-        <span className="hidden xl:inline">{lang === 'ru' ? 'Поиск или команда...' : 'Search or command...'}</span>
+        <span className="hidden xl:inline">{t.commandPalette.placeholder}</span>
         <kbd className="pointer-events-none inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-white/[0.06] text-slate-400 border border-white/[0.08]">
           <span className="text-[11px]">⌘</span>K
         </kbd>
@@ -114,7 +115,7 @@ export function CommandPalette() {
                 <Command.Input
                   value={query}
                   onValueChange={setQuery}
-                  placeholder={lang === 'ru' ? "Команда или поиск проектов и задач..." : "Type a command or search projects & tasks..."}
+                  placeholder={t.commandPalette.modalPlaceholder}
                   className="w-full py-4 bg-transparent text-sm text-white placeholder:text-slate-500 focus:outline-none"
                   autoFocus
                 />
@@ -132,13 +133,13 @@ export function CommandPalette() {
               {/* Scrollable Command List */}
               <Command.List className="max-h-96 overflow-y-auto p-2 divide-y divide-white/[0.04]">
                 <Command.Empty className="py-8 text-center text-xs text-slate-500">
-                  {lang === 'ru' ? 'Нет совпадений.' : 'No matching commands, projects or tasks found.'}
+                  {t.commandPalette.noResults}
                 </Command.Empty>
 
                 {/* Real Matched Projects */}
                 {searchResults.projects.length > 0 && (
                   <Command.Group
-                    heading={t.navigation?.projects || 'Projects'}
+                    heading={t.nav.projects}
                     className="text-[10px] font-bold uppercase tracking-wider text-cyan-400 px-2.5 py-1.5"
                   >
                     {searchResults.projects.map((proj) => (
@@ -164,7 +165,7 @@ export function CommandPalette() {
                 {/* Real Matched Tasks */}
                 {searchResults.tasks.length > 0 && (
                   <Command.Group
-                    heading={t.navigation?.tasks || 'Tasks'}
+                    heading={t.nav.tasks}
                     className="text-[10px] font-bold uppercase tracking-wider text-amber-400 px-2.5 py-1.5"
                   >
                     {searchResults.tasks.map((task) => (
@@ -188,7 +189,7 @@ export function CommandPalette() {
 
                 {/* Navigation Sections */}
                 <Command.Group
-                  heading="Navigation"
+                  heading={t.commandPalette.navigation}
                   className="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-2.5 py-1.5"
                 >
                   <Command.Item
@@ -197,7 +198,7 @@ export function CommandPalette() {
                     className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/[0.06] hover:text-white cursor-pointer transition-colors aria-selected:bg-indigo-600/20 aria-selected:text-white"
                   >
                     <LayoutDashboard className="w-4 h-4 text-indigo-400" />
-                    <span>{t.navigation?.dashboard || 'Dashboard'}</span>
+                    <span>{t.nav.dashboard}</span>
                   </Command.Item>
 
                   <Command.Item
@@ -206,7 +207,7 @@ export function CommandPalette() {
                     className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/[0.06] hover:text-white cursor-pointer transition-colors aria-selected:bg-indigo-600/20 aria-selected:text-white"
                   >
                     <Users className="w-4 h-4 text-cyan-400" />
-                    <span>{t.navigation?.team || 'Team'}</span>
+                    <span>{t.nav.team}</span>
                   </Command.Item>
 
                   <Command.Item
@@ -215,7 +216,7 @@ export function CommandPalette() {
                     className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/[0.06] hover:text-white cursor-pointer transition-colors aria-selected:bg-indigo-600/20 aria-selected:text-white"
                   >
                     <BarChart3 className="w-4 h-4 text-emerald-400" />
-                    <span>{t.navigation?.analytics || 'Analytics'}</span>
+                    <span>{t.nav.analytics}</span>
                   </Command.Item>
 
                   <Command.Item
@@ -230,7 +231,7 @@ export function CommandPalette() {
 
                 {/* Account Settings & General */}
                 <Command.Group
-                  heading="Settings & System"
+                  heading={t.commandPalette.settingsSystem}
                   className="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-2.5 py-1.5"
                 >
                   <Command.Item
@@ -239,7 +240,7 @@ export function CommandPalette() {
                     className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/[0.06] hover:text-white cursor-pointer transition-colors aria-selected:bg-indigo-600/20 aria-selected:text-white"
                   >
                     <Settings className="w-4 h-4 text-slate-400" />
-                    <span>{t.navigation?.settings || 'Settings'}</span>
+                    <span>{t.nav.settings}</span>
                   </Command.Item>
 
                   <Command.Item
@@ -248,7 +249,7 @@ export function CommandPalette() {
                     className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/[0.06] hover:text-white cursor-pointer transition-colors aria-selected:bg-indigo-600/20 aria-selected:text-white"
                   >
                     <Shield className="w-4 h-4 text-slate-400" />
-                    <span>Security &amp; Password</span>
+                    <span>{t.commandPalette.securityPassword}</span>
                   </Command.Item>
 
                   <Command.Item
@@ -257,13 +258,13 @@ export function CommandPalette() {
                     className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-white/[0.06] hover:text-white cursor-pointer transition-colors aria-selected:bg-indigo-600/20 aria-selected:text-white"
                   >
                     <Globe className="w-4 h-4 text-indigo-400" />
-                    <span>{lang === 'ru' ? 'Switch to English' : 'Переключить на Русский'}</span>
+                    <span>{lang === 'ru' ? t.commandPalette.switchToEn : t.commandPalette.switchToRu}</span>
                   </Command.Item>
                 </Command.Group>
 
                 {/* Quick Actions */}
                 <Command.Group
-                  heading="Quick Actions"
+                  heading={t.commandPalette.quickActions}
                   className="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-2.5 py-1.5"
                 >
                   <Command.Item
@@ -272,7 +273,7 @@ export function CommandPalette() {
                     className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-rose-400 hover:bg-rose-500/10 cursor-pointer transition-colors aria-selected:bg-rose-500/20"
                   >
                     <LogOut className="w-4 h-4" />
-                    <span>{t.navigation?.logout || 'Logout'}</span>
+                    <span>{t.nav.logout}</span>
                   </Command.Item>
                 </Command.Group>
               </Command.List>
@@ -280,10 +281,10 @@ export function CommandPalette() {
               {/* Command Palette Footer */}
               <div className="px-4 py-2.5 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-slate-500 bg-black/30">
                 <div className="flex items-center gap-3">
-                  <span>Navigation: <kbd className="px-1.5 py-0.5 rounded bg-white/[0.06]">↑</kbd> <kbd className="px-1.5 py-0.5 rounded bg-white/[0.06]">↓</kbd></span>
-                  <span>Select: <kbd className="px-1.5 py-0.5 rounded bg-white/[0.06]">↵</kbd></span>
+                  <span>{t.commandPalette.navHint} <kbd className="px-1.5 py-0.5 rounded bg-white/[0.06]">↑</kbd> <kbd className="px-1.5 py-0.5 rounded bg-white/[0.06]">↓</kbd></span>
+                  <span>{t.commandPalette.selectHint} <kbd className="px-1.5 py-0.5 rounded bg-white/[0.06]">↵</kbd></span>
                 </div>
-                <span>Close: <kbd className="px-1.5 py-0.5 rounded bg-white/[0.06]">esc</kbd></span>
+                <span>{t.commandPalette.closeHint} <kbd className="px-1.5 py-0.5 rounded bg-white/[0.06]">esc</kbd></span>
               </div>
             </Command>
           </div>

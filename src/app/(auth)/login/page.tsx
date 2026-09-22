@@ -4,7 +4,7 @@ import { useState, useTransition, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { login, resetPassword } from '@/app/actions/auth';
-import { useTranslation } from '@/context/language-context';
+import { useLanguage } from '@/context/language-context';
 import { toast } from 'sonner';
 import { 
   Mail, 
@@ -25,7 +25,8 @@ function LoginForm() {
 
   const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
-  const { t } = useTranslation();
+  const { t: typedT } = useLanguage();
+  const t = typedT as any;
   const [errorMessage, setErrorMessage] = useState<string | null>(
     urlError === 'unauthorized' ? 'You do not have access to this resource.' : null
   );

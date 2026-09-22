@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { register } from '@/app/actions/auth';
-import { useTranslation } from '@/context/language-context';
+import { useLanguage } from '@/context/language-context';
 import { toast } from 'sonner';
 import { 
   User, 
@@ -23,7 +23,8 @@ import {
 export default function RegisterPage() {
   const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
-  const { t } = useTranslation();
+  const { t: typedT } = useLanguage();
+  const t = typedT as any;
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successInfo, setSuccessInfo] = useState<string | null>(null);
 

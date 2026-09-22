@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { createProject } from '@/app/actions/projects';
-import { useTranslation } from '@/context/language-context';
+import { useLanguage } from '@/context/language-context';
 import { X, Loader2, Sparkles, AlertTriangle, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -27,11 +27,10 @@ export function CreateProjectDialog({ currentProjectCount, subscriptionTier }: C
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const { lang, t } = useTranslation();
+  const { lang, t } = useLanguage();
 
   const [color, setColor] = useState(COLORS[0]);
 
-  // Project limit logic: FREE tier allows up to 2 projects (total 3, wait, the prompt says "если уже создано 2 проекта")
   const maxProjects = 2;
   const isLimitReached = subscriptionTier === 'FREE' && currentProjectCount >= maxProjects;
 
@@ -39,7 +38,7 @@ export function CreateProjectDialog({ currentProjectCount, subscriptionTier }: C
     e.preventDefault();
     
     if (isLimitReached) {
-      toast.error(lang === 'ru' ? 'Лимит проектов достигнут' : 'Project limit reached');
+      toast.error(t.projects.limitWarningTitle);
       return;
     }
 
@@ -49,7 +48,7 @@ export function CreateProjectDialog({ currentProjectCount, subscriptionTier }: C
     startTransition(async () => {
       const res = await createProject(formData);
       if (res.success) {
-        toast.success('Проект создан!');
+        toast.success(t.toasts.success);
         setIsOpen(false);
         router.refresh();
         (e.target as HTMLFormElement).reset();
@@ -57,7 +56,7 @@ export function CreateProjectDialog({ currentProjectCount, subscriptionTier }: C
           router.push(`/dashboard/projects/${res.project.id}/board`);
         }
       } else {
-        toast.error(res.error || 'Ошибка создания проекта');
+        toast.error(res.error || t.toasts.error);
       }
     });
   };
@@ -69,7 +68,7 @@ export function CreateProjectDialog({ currentProjectCount, subscriptionTier }: C
         className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-medium transition-all cursor-pointer shadow-lg shadow-indigo-500/25"
       >
         <Plus className="w-4 h-4" />
-        <span>+ Новый проект</span>
+        <span>+ {t.projects.newProject}</span>
       </button>
 
       {isOpen && (
@@ -80,11 +79,12 @@ export function CreateProjectDialog({ currentProjectCount, subscriptionTier }: C
             <div className="flex items-center justify-between p-6 border-b border-white/[0.05]">
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-indigo-400" />
-                Создание проекта
+                {t.projects.modalTitle}
               </h2>
               <button 
                 onClick={() => setIsOpen(false)}
                 className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.05] transition-colors"
+                title={t.common.close}
               >
                 <X className="w-5 h-5" />
               </button>
@@ -96,7 +96,7 @@ export function CreateProjectDialog({ currentProjectCount, subscriptionTier }: C
                   <div className="flex items-start gap-3 text-rose-400">
                     <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                     <p className="text-sm">
-                      Вы достигли лимита тарифа FREE (максимум 2 проекта). Чтобы создавать больше проектов, обновите тариф до PRO.
+                      {t.projects.limitWarningDesc}
                     </p>
                   </div>
                   <button
@@ -107,7 +107,7 @@ export function CreateProjectDialog({ currentProjectCount, subscriptionTier }: C
                     }}
                     className="self-end px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-xs font-bold uppercase tracking-wide transition-colors"
                   >
-                    Обновить до PRO
+                    {t.projects.upgradeButton}
                   </button>
                 </div>
               ) : null}
@@ -115,33 +115,33 @@ export function CreateProjectDialog({ currentProjectCount, subscriptionTier }: C
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
-                    Название проекта <span className="text-rose-500">*</span>
+                    {t.projects.name} <span className="text-rose-500">*</span>
                   </label>
                   <input
                     name="name"
                     required
                     disabled={isLimitReached}
                     className="w-full px-4 py-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 transition-all placeholder:text-slate-600"
-                    placeholder="Например: Редизайн платформы"
+                    placeholder={t.projects.namePlaceholder}
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
-                    Описание (необязательно)
+                    {t.projects.projectDescription}
                   </label>
                   <textarea
                     name="description"
                     disabled={isLimitReached}
                     rows={3}
                     className="w-full px-4 py-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/50 transition-all placeholder:text-slate-600 resize-none"
-                    placeholder="Краткое описание целей..."
+                    placeholder={t.projects.descPlaceholder}
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
-                    Срок сдачи (дедлайн)
+                    {t.projects.deadline}
                   </label>
                   <input
                     name="due_date"
@@ -153,7 +153,7 @@ export function CreateProjectDialog({ currentProjectCount, subscriptionTier }: C
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                    Цвет проекта
+                    {t.projects.color}
                   </label>
                   <div className="flex items-center gap-3">
                     {COLORS.map((c) => (
@@ -177,14 +177,14 @@ export function CreateProjectDialog({ currentProjectCount, subscriptionTier }: C
                     onClick={() => setIsOpen(false)}
                     className="px-4 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-white/[0.05] transition-colors"
                   >
-                    Отмена
+                    {t.common.cancel}
                   </button>
                   <button
                     type="submit"
                     disabled={isPending || isLimitReached}
                     className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition-all shadow-lg shadow-indigo-500/25 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[120px]"
                   >
-                    {isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Создание...</> : 'Создать проект'}
+                    {isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{t.common.loading}</> : t.common.create}
                   </button>
                 </div>
               </form>

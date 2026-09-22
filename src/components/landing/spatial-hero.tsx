@@ -2,14 +2,15 @@
 
 import { useState } from 'react';
 import { Zap, ArrowRight, ShieldCheck, Activity, Play, CheckCircle2, Circle } from 'lucide-react';
-import { useTranslation } from '@/context/language-context';
+import { useLanguage } from '@/context/language-context';
 import { LanguageToggle } from '@/components/ui/language-toggle';
 import { InteractiveGridCanvas } from './interactive-grid-canvas';
 import { Floating3DCard } from './floating-3d-card';
 import Link from 'next/link';
 
 export function SpatialHero() {
-  const { t } = useTranslation();
+  const { t: typedT } = useLanguage();
+  const t = typedT as any;
   const [taskStatus, setTaskStatus] = useState<'progress' | 'done'>('progress');
 
   const handleTaskClick = () => {

@@ -14,6 +14,7 @@ import {
   Clock 
 } from 'lucide-react';
 import type { TaskPriority, AssigneeProfile } from '@/types/kanban';
+import { useLanguage } from '@/context/language-context';
 
 interface CreateTaskDialogProps {
   projectId: string;
@@ -23,6 +24,8 @@ interface CreateTaskDialogProps {
 export function CreateTaskDialog({ projectId, members }: CreateTaskDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const { t: typedT } = useLanguage();
+  const t = typedT as any;
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -34,7 +37,7 @@ export function CreateTaskDialog({ projectId, members }: CreateTaskDialogProps) 
     e.preventDefault();
 
     if (!title.trim()) {
-      toast.error('Please enter a task title.');
+      toast.error(t.toasts.error);
       return;
     }
 
@@ -49,10 +52,10 @@ export function CreateTaskDialog({ projectId, members }: CreateTaskDialogProps) 
     startTransition(async () => {
       const res = await createTask(formData);
       if (res.success) {
-        toast.success('Task created successfully!');
+        toast.success(t.toasts.success);
         handleClose();
       } else {
-        toast.error(res.error || 'Failed to create task.');
+        toast.error(res.error || t.toasts.error);
       }
     });
   };
@@ -73,7 +76,7 @@ export function CreateTaskDialog({ projectId, members }: CreateTaskDialogProps) 
         className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-lg shadow-indigo-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
       >
         <Plus className="w-4 h-4" />
-        <span>New Task</span>
+        <span>{t.board.addTask}</span>
       </button>
 
       {isOpen && (
@@ -85,14 +88,15 @@ export function CreateTaskDialog({ projectId, members }: CreateTaskDialogProps) 
             <button
               onClick={handleClose}
               className="absolute top-5 right-5 text-slate-400 hover:text-white transition-colors"
+              title={t.common.close}
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="mb-6">
-              <h3 className="text-xl font-bold text-white">Create New Task</h3>
+              <h3 className="text-xl font-bold text-white">{t.board.createTaskModalTitle}</h3>
               <p className="text-xs text-slate-400 mt-1">
-                Add an action item to the project Kanban board
+                {t.board.createTaskModalDesc}
               </p>
             </div>
 
@@ -100,14 +104,14 @@ export function CreateTaskDialog({ projectId, members }: CreateTaskDialogProps) 
               {/* Title */}
               <div className="space-y-1.5">
                 <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
-                  Task Title *
+                  {t.board.taskTitle} <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
                   required
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g., Implement 3D spatial viewport"
+                  placeholder={t.board.taskTitlePlaceholder}
                   className="glass-input w-full px-4 py-2.5 rounded-xl text-sm placeholder:text-slate-500"
                 />
               </div>
@@ -115,13 +119,13 @@ export function CreateTaskDialog({ projectId, members }: CreateTaskDialogProps) 
               {/* Description */}
               <div className="space-y-1.5">
                 <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
-                  Description
+                  {t.projects.projectDescription}
                 </label>
                 <textarea
                   rows={3}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Details, acceptance criteria, or links..."
+                  placeholder="..."
                   className="glass-input w-full px-4 py-2.5 rounded-xl text-sm placeholder:text-slate-500 resize-none"
                 />
               </div>
@@ -129,15 +133,15 @@ export function CreateTaskDialog({ projectId, members }: CreateTaskDialogProps) 
               {/* Priority Selector */}
               <div className="space-y-1.5">
                 <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
-                  Priority
+                  {t.board.priority}
                 </label>
                 <div className="grid grid-cols-4 gap-2">
                   {(
                     [
-                      { id: 'LOW', label: 'Low', icon: <Clock className="w-3.5 h-3.5" />, color: 'border-cyan-500/50 text-cyan-300' },
-                      { id: 'MEDIUM', label: 'Medium', icon: <Clock className="w-3.5 h-3.5" />, color: 'border-indigo-500/50 text-indigo-300' },
-                      { id: 'HIGH', label: 'High', icon: <Zap className="w-3.5 h-3.5" />, color: 'border-amber-500/50 text-amber-300' },
-                      { id: 'URGENT', label: 'Urgent', icon: <AlertCircle className="w-3.5 h-3.5" />, color: 'border-rose-500/50 text-rose-300' },
+                      { id: 'LOW', label: t.board.priorityLow, icon: <Clock className="w-3.5 h-3.5" />, color: 'border-cyan-500/50 text-cyan-300' },
+                      { id: 'MEDIUM', label: t.board.priorityMedium, icon: <Clock className="w-3.5 h-3.5" />, color: 'border-indigo-500/50 text-indigo-300' },
+                      { id: 'HIGH', label: t.board.priorityHigh, icon: <Zap className="w-3.5 h-3.5" />, color: 'border-amber-500/50 text-amber-300' },
+                      { id: 'URGENT', label: t.board.priorityUrgent, icon: <AlertCircle className="w-3.5 h-3.5" />, color: 'border-rose-500/50 text-rose-300' },
                     ] as const
                   ).map((p) => {
                     const isSelected = priority === p.id;
@@ -145,7 +149,7 @@ export function CreateTaskDialog({ projectId, members }: CreateTaskDialogProps) 
                       <button
                         key={p.id}
                         type="button"
-                        onClick={() => setPriority(p.id)}
+                        onClick={() => setPriority(p.id as TaskPriority)}
                         className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                           isSelected
                             ? `bg-white/[0.08] ${p.color} shadow-lg`
@@ -165,7 +169,7 @@ export function CreateTaskDialog({ projectId, members }: CreateTaskDialogProps) 
                 {/* Assignee */}
                 <div className="space-y-1.5">
                   <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
-                    Assignee
+                    {t.board.assignee}
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
@@ -176,7 +180,7 @@ export function CreateTaskDialog({ projectId, members }: CreateTaskDialogProps) 
                       onChange={(e) => setAssigneeId(e.target.value)}
                       className="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-xs appearance-none bg-[#0a0d14]"
                     >
-                      <option value="">Unassigned</option>
+                      <option value="">{t.board.unassigned}</option>
                       {members.map((m) => (
                         <option key={m.id} value={m.id} className="bg-[#121622] text-slate-200">
                           {m.full_name} (@{m.username})
@@ -189,7 +193,7 @@ export function CreateTaskDialog({ projectId, members }: CreateTaskDialogProps) 
                 {/* Deadline */}
                 <div className="space-y-1.5">
                   <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
-                    Deadline
+                    {t.projects.deadline}
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
@@ -199,7 +203,7 @@ export function CreateTaskDialog({ projectId, members }: CreateTaskDialogProps) 
                       type="date"
                       value={deadline}
                       onChange={(e) => setDeadline(e.target.value)}
-                      className="glass-input w-full pl-9 pr-3 py-2 rounded-xl text-xs text-slate-200"
+                      className="glass-input w-full pl-9 pr-3 py-2 rounded-xl text-xs text-slate-200 [color-scheme:dark]"
                     />
                   </div>
                 </div>
@@ -212,7 +216,7 @@ export function CreateTaskDialog({ projectId, members }: CreateTaskDialogProps) 
                   onClick={handleClose}
                   className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
                 >
-                  Cancel
+                  {t.common.cancel}
                 </button>
                 <button
                   type="submit"
@@ -222,10 +226,10 @@ export function CreateTaskDialog({ projectId, members }: CreateTaskDialogProps) 
                   {isPending ? (
                     <>
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      <span>Creating...</span>
+                      <span>{t.common.loading}...</span>
                     </>
                   ) : (
-                    <span>Create Task</span>
+                    <span>{t.common.create}</span>
                   )}
                 </button>
               </div>

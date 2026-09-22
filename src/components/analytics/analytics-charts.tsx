@@ -3,7 +3,7 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { Lock, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
-import { useTranslation } from '@/context/language-context';
+import { useLanguage } from '@/context/language-context';
 
 const PRIORITY_COLORS: Record<string, string> = {
   'Низкий': '#94a3b8',
@@ -21,7 +21,7 @@ export function AnalyticsCharts({
   tasksByPriority: any[];
   subscriptionTier: 'FREE' | 'PRO';
 }) {
-  const { lang, t } = useTranslation();
+  const { lang, t } = useLanguage();
 
   return (
     <div className="space-y-6">

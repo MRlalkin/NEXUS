@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { Kanban, LayoutGrid, Calendar, Users as UsersIcon, CheckCircle2, CheckSquare } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import { CreateProjectDialog } from '@/components/projects/create-project-dialog';
+import { cookies } from 'next/headers';
+import { translations, AppLanguage } from '@/locales/translations';
 
 export const metadata = {
   title: 'Projects | NEXUS',
@@ -13,6 +15,11 @@ export const metadata = {
 };
 
 export default async function ProjectsPage() {
+  const cookieStore = await cookies();
+  const langCookie = cookieStore.get('nexus_lang')?.value as AppLanguage | undefined;
+  const lang = (langCookie === 'ru' || langCookie === 'en') ? langCookie : 'ru';
+  const t = translations[lang];
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -55,10 +62,10 @@ export default async function ProjectsPage() {
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
             <LayoutGrid className="w-6 h-6 text-indigo-400" />
-            Мои проекты
+            {t.projects.title}
           </h1>
           <p className="text-sm text-slate-400 mt-1">
-            Управление вашими рабочими пространствами и задачами
+            {t.projects.description}
           </p>
         </div>
         
@@ -73,9 +80,9 @@ export default async function ProjectsPage() {
           <div className="col-span-full py-16 text-center glass-panel rounded-2xl border border-white/[0.08] flex flex-col items-center justify-center relative overflow-hidden">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-indigo-500/10 blur-[80px] rounded-full pointer-events-none" />
             <Kanban className="w-12 h-12 text-indigo-400/50 mb-4 relative z-10" />
-            <h3 className="text-xl font-bold text-white mb-2 relative z-10">Проектов пока нет.</h3>
+            <h3 className="text-xl font-bold text-white mb-2 relative z-10">{t.projects.emptyTitle}</h3>
             <p className="text-slate-400 text-sm max-w-sm mb-6 relative z-10">
-              Создайте первый проект для начала работы.
+              {t.projects.emptyDesc}
             </p>
           </div>
         )}
@@ -104,7 +111,7 @@ export default async function ProjectsPage() {
                   
                   <div className="flex flex-col items-end">
                     <span className="text-2xl font-bold text-white leading-none">{progress}%</span>
-                    <span className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mt-1">Прогресс</span>
+                    <span className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mt-1">{t.projects.progress}</span>
                   </div>
                 </div>
 
@@ -116,7 +123,7 @@ export default async function ProjectsPage() {
                   </p>
                 ) : (
                   <p className="text-xs text-slate-500/50 mt-1 italic">
-                    Без описания
+                    {t.projects.noDescription}
                   </p>
                 )}
               </div>
@@ -135,7 +142,7 @@ export default async function ProjectsPage() {
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-1.5 bg-white/[0.04] px-2 py-1 rounded-md" title="задач">
                     <CheckSquare className="w-3.5 h-3.5 text-slate-400" />
-                    <span className="font-medium text-slate-300">{doneTasks}/{totalTasks} задач</span>
+                    <span className="font-medium text-slate-300">{doneTasks}/{totalTasks} {t.projects.tasks}</span>
                   </div>
                   <div className="flex items-center gap-1.5" title="Дедлайн">
                     <Calendar className="w-3.5 h-3.5 text-slate-400" />
@@ -143,7 +150,7 @@ export default async function ProjectsPage() {
                   </div>
                   <div className="flex items-center gap-1.5" title="участников">
                     <UsersIcon className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{project.project_members ? project.project_members.length : 1} участников</span>
+                    <span>{project.project_members ? project.project_members.length : 1} {t.projects.members}</span>
                   </div>
                 </div>
               </div>
