@@ -147,10 +147,10 @@ export function KanbanBoard({ projectId, initialTasks }: { projectId: string; in
   };
 
   return (
-    <div className="flex-1 flex overflow-x-auto overflow-y-hidden pb-4 gap-6 scrollbar-hide h-full">
+    <div className="flex-1 flex overflow-x-auto overflow-y-hidden pb-4 gap-4 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent h-full">
       <DragDropContext onDragEnd={handleDragEnd}>
         {COLUMNS_CONFIG.map(column => (
-          <div key={column.id} className="flex flex-col w-80 flex-shrink-0 h-full">
+          <div key={column.id} className="flex flex-col w-[280px] sm:w-[320px] shrink-0 snap-center h-full">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <div className={`w-3 h-3 rounded-full ${column.color}`} />
