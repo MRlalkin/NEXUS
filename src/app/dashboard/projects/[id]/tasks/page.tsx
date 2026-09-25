@@ -1,22 +1,36 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { CheckSquare, Filter } from 'lucide-react';
+import { CheckSquare } from 'lucide-react';
+import { TaskFilters } from '@/components/tasks/task-filters';
 
-export default async function TasksPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function TasksPage(
+  props: { 
+    params: Promise<{ id: string }>;
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  }
+) {
+  const { id } = await props.params;
+  const searchParams = await props.searchParams;
+  const statusFilter = searchParams?.status as string | undefined;
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) redirect('/login');
 
-  const { data: tasks } = await supabase
+  let query = supabase
     .from('tasks')
     .select(`
       id, title, description, status, priority, created_at,
       assignee:assignee_id(id, full_name, username)
     `)
-    .eq('project_id', id)
-    .order('created_at', { ascending: false });
+    .eq('project_id', id);
+
+  if (statusFilter) {
+    query = query.eq('status', statusFilter);
+  }
+
+  const { data: tasks } = await query.order('created_at', { ascending: false });
 
   return (
     <div className="h-full w-full p-6 overflow-y-auto">
@@ -25,10 +39,7 @@ export default async function TasksPage({ params }: { params: Promise<{ id: stri
           <CheckSquare className="w-5 h-5 text-indigo-400" />
           Project Tasks
         </h2>
-        <button className="flex items-center gap-2 px-3 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 rounded-lg text-sm transition-colors border border-white/[0.05]">
-          <Filter className="w-4 h-4" />
-          <span>Filter</span>
-        </button>
+        <TaskFilters />
       </div>
 
       <div className="glass-panel rounded-xl border border-white/[0.08] overflow-hidden">

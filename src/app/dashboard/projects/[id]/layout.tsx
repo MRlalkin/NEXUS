@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Kanban, CheckSquare, Users, Activity, Settings, ArrowLeft } from 'lucide-react';
+import { Kanban, ArrowLeft } from 'lucide-react';
+import { ProjectTabs } from '@/components/projects/project-tabs';
 import { ReactNode } from 'react';
 
 export default async function ProjectLayout({
@@ -75,30 +76,7 @@ export default async function ProjectLayout({
         </div>
 
         {/* Project Navigation Tabs */}
-        <nav className="flex items-center gap-6 overflow-x-auto no-scrollbar">
-          <Link href={`${basePath}/board`} className="flex items-center gap-2 pb-3 border-b-2 border-indigo-500 text-white font-medium text-sm whitespace-nowrap">
-            <Kanban className="w-4 h-4 text-indigo-400" />
-            Доска
-          </Link>
-          <Link href={`${basePath}/tasks`} className="flex items-center gap-2 pb-3 border-b-2 border-transparent text-slate-400 hover:text-white transition-colors text-sm font-medium whitespace-nowrap">
-            <CheckSquare className="w-4 h-4" />
-            Задачи
-          </Link>
-          <Link href={`${basePath}/team`} className="flex items-center gap-2 pb-3 border-b-2 border-transparent text-slate-400 hover:text-white transition-colors text-sm font-medium whitespace-nowrap">
-            <Users className="w-4 h-4" />
-            Команда
-          </Link>
-          <Link href={`${basePath}/activity`} className="flex items-center gap-2 pb-3 border-b-2 border-transparent text-slate-400 hover:text-white transition-colors text-sm font-medium whitespace-nowrap">
-            <Activity className="w-4 h-4" />
-            Активность
-          </Link>
-          {role === 'OWNER' && (
-            <Link href={`${basePath}/settings`} className="flex items-center gap-2 pb-3 border-b-2 border-transparent text-slate-400 hover:text-white transition-colors text-sm font-medium whitespace-nowrap">
-              <Settings className="w-4 h-4" />
-              Настройки
-            </Link>
-          )}
-        </nav>
+        <ProjectTabs projectId={id} role={role} />
       </header>
 
       {/* Main Content Area */}
