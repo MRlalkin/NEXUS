@@ -21,18 +21,34 @@ export default async function ProjectLayout({
   const { data: project } = await supabase
     .from('projects')
     .select(`
-      id, name, color, description,
-      project_members!inner(role)
+      id, name, color, description, owner_id,
+      project_members (role, user_id)
     `)
     .eq('id', id)
-    .eq('project_members.user_id', user.id)
-    .single();
+    .maybeSingle();
 
   if (!project) {
     redirect('/dashboard/projects');
   }
 
-  const role = project.project_members[0].role;
+  const isOwner = project.owner_id === user.id;
+  const memberRecord = project.project_members?.find((m: any) => m.user_id === user.id);
+  const isMember = !!memberRecord;
+
+  if (!isOwner && !isMember) {
+    redirect('/dashboard/projects');
+  }
+
+  // Auto-add owner if missing from project_members
+  if (isOwner && !isMember) {
+    await supabase.from('project_members').upsert({
+      project_id: project.id,
+      user_id: user.id,
+      role: 'OWNER'
+    });
+  }
+
+  const role = isOwner ? 'OWNER' : memberRecord?.role;
   const basePath = `/dashboard/projects/${id}`;
 
   return (

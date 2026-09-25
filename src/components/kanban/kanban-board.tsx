@@ -40,7 +40,7 @@ const PRIORITY_COLORS = {
 };
 
 export function KanbanBoard({ projectId, initialTasks }: { projectId: string; initialTasks: Task[] }) {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [tasks, setTasks] = useState<Task[]>(initialTasks || []);
   const [isPending, startTransition] = useTransition();
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
   const { t } = useLanguage();

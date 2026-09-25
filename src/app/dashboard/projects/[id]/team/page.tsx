@@ -24,9 +24,16 @@ export default async function TeamPage({ params }: { params: Promise<{ id: strin
     .select('role')
     .eq('project_id', id)
     .eq('user_id', user.id)
-    .single();
+    .maybeSingle();
 
-  const canInvite = currentUserMember?.role === 'OWNER' || currentUserMember?.role === 'ADMIN';
+  const { data: project } = await supabase
+    .from('projects')
+    .select('owner_id')
+    .eq('id', id)
+    .maybeSingle();
+
+  const isOwner = project?.owner_id === user.id;
+  const canInvite = isOwner || currentUserMember?.role === 'OWNER' || currentUserMember?.role === 'ADMIN';
 
   return (
     <div className="h-full w-full p-6 overflow-y-auto">

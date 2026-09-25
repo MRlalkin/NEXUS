@@ -14,16 +14,20 @@ export default async function SettingsPage({ params }: { params: Promise<{ id: s
     .from('projects')
     .select('*')
     .eq('id', id)
-    .single();
+    .maybeSingle();
+
+  if (!project) redirect('/dashboard/projects');
 
   const { data: member } = await supabase
     .from('project_members')
     .select('role')
     .eq('project_id', id)
     .eq('user_id', user.id)
-    .single();
+    .maybeSingle();
 
-  if (member?.role !== 'OWNER') {
+  const isOwner = project.owner_id === user.id || member?.role === 'OWNER';
+
+  if (!isOwner) {
     return (
       <div className="p-6">
         <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-4 text-rose-400 text-sm flex items-center gap-2">
