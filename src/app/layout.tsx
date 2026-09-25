@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'NEXUS | Modern Project & Team Management',
-  description: 'Enterprise-grade project and team management SaaS platform.',
+  title: 'NEXUS — Next-Gen Project Workspace',
+  description: 'NEXUS — Next-Gen Project Workspace',
 };
 
 export default async function RootLayout({

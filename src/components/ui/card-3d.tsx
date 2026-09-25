@@ -64,6 +64,11 @@ export function Card3D({
     setIsHovered(true);
   };
 
+  const spotlightBackground = useTransform(
+    [spotX, spotY],
+    ([x, y]) => `radial-gradient(400px circle at ${x}px ${y}px, ${glowColor}, transparent 75%)`
+  );
+
   const handleMouseLeave = () => {
     setIsHovered(false);
     mouseX.set(0);
@@ -100,11 +105,7 @@ export function Card3D({
             className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 transition-opacity duration-300 z-10"
             style={{
               opacity: isHovered ? 1 : 0,
-              background: useTransform(
-                [spotX, spotY],
-                ([x, y]) =>
-                  `radial-gradient(400px circle at ${x}px ${y}px, ${glowColor}, transparent 75%)`
-              ),
+              background: spotlightBackground,
             }}
           />
         )}

@@ -53,9 +53,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           {t.footer.copyright}
         </div>
         <div className="flex items-center gap-6">
-          <a href="#" className="hover:text-slate-300 transition-colors">Privacy Policy</a>
-          <a href="#" className="hover:text-slate-300 transition-colors">Terms of Service</a>
-          <a href="#" className="hover:text-slate-300 transition-colors">Security</a>
+          <a href="/" className="hover:text-slate-300 transition-colors">Privacy Policy</a>
+          <a href="/" className="hover:text-slate-300 transition-colors">Terms of Service</a>
+          <a href="/" className="hover:text-slate-300 transition-colors">Security</a>
         </div>
       </footer>
     </div>

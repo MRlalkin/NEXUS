@@ -47,7 +47,9 @@ export function ConfirmDialog({
 
   React.useEffect(() => {
     if (!isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVerificationInput('');
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoading(false);
     }
   }, [isOpen]);

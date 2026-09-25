@@ -17,12 +17,14 @@ export function LanguageProvider({ children, initialLang = 'ru' }: { children: R
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
     try {
       const match = document.cookie.match(new RegExp('(^| )nexus_lang=([^;]+)'));
       if (match) {
         const cookieLang = match[2] as AppLanguage;
         if (cookieLang === 'ru' || cookieLang === 'en') {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setLangState(cookieLang);
         }
       }

@@ -88,6 +88,10 @@ export function KanbanCard3D({ task, isDragging = false, onDelete }: KanbanCard3
   };
 
   const theme = getPriorityTheme(task.priority);
+  const spotlightBackground = useTransform(
+    [spotX, spotY],
+    ([x, y]) => `radial-gradient(280px circle at ${x}px ${y}px, ${theme.spotlightColor}, transparent 80%)`
+  );
 
   return (
     <div
@@ -123,11 +127,7 @@ export function KanbanCard3D({ task, isDragging = false, onDelete }: KanbanCard3
             className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 transition-opacity duration-200 z-10"
             style={{
               opacity: isHovered ? 1 : 0,
-              background: useTransform(
-                [spotX, spotY],
-                ([x, y]) =>
-                  `radial-gradient(280px circle at ${x}px ${y}px, ${theme.spotlightColor}, transparent 80%)`
-              ),
+              background: spotlightBackground,
             }}
           />
         )}
