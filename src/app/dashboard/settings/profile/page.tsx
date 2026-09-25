@@ -25,6 +25,7 @@ export default async function ProfileSettingsPage() {
     email: user.email || '',
     bio: profile?.bio || '',
     avatarUrl: profile?.avatar_url || '',
+    tier: profile?.subscription_tier || 'FREE',
   };
 
   return (

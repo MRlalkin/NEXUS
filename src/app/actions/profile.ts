@@ -6,10 +6,19 @@ import { revalidatePath } from 'next/cache';
 
 export async function updateProfile(formData: FormData) {
   try {
-    const fullName = formData.get('full_name') as string;
+    const fullName = formData.get('fullName') as string;
     const username = formData.get('username') as string;
     const bio = formData.get('bio') as string;
-    // Avatar upload would be more complex (storage), skipping for now.
+    const avatarUrl = formData.get('avatarUrl') as string;
+    const avatarFile = formData.get('avatarFile') as File | null;
+
+    if (fullName && (fullName.length < 2 || fullName.length > 50)) {
+      return { success: false, error: 'Full name must be between 2 and 50 characters' };
+    }
+
+    if (username && !/^[a-zA-Z0-9_-]+$/.test(username)) {
+      return { success: false, error: 'Username can only contain letters, numbers, hyphens, and underscores' };
+    }
 
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -30,12 +39,35 @@ export async function updateProfile(formData: FormData) {
       }
     }
 
+    let finalAvatarUrl = avatarUrl;
+
+    if (avatarFile && avatarFile.size > 0) {
+      const fileExt = avatarFile.name.split('.').pop();
+      const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabaseAdmin.storage
+        .from('avatars')
+        .upload(fileName, avatarFile, { upsert: true });
+        
+      if (uploadError) {
+        console.error('Avatar upload error:', uploadError);
+        return { success: false, error: 'Failed to upload avatar' };
+      }
+
+      const { data: { publicUrl } } = supabaseAdmin.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+        
+      finalAvatarUrl = publicUrl;
+    }
+
     const { error } = await supabaseAdmin
       .from('profiles')
       .update({
         full_name: fullName || null,
         username: username || null,
         bio: bio || null,
+        avatar_url: finalAvatarUrl || null,
         updated_at: new Date().toISOString(),
       })
       .eq('id', user.id);

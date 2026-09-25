@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { Settings, Trash2, AlertTriangle, Save } from 'lucide-react';
+import { Settings, AlertTriangle } from 'lucide-react';
+import { ProjectSettings } from '@/components/projects/project-settings';
 
 export default async function SettingsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -44,54 +45,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ id: s
           <p className="text-sm text-slate-400">Update project details and preferences.</p>
         </div>
 
-        <div className="glass-panel p-6 rounded-2xl border border-white/[0.08]">
-          <form className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
-                Project Name
-              </label>
-              <input
-                defaultValue={project?.name}
-                className="w-full px-4 py-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none focus:border-indigo-500 transition-all text-sm"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
-                Description
-              </label>
-              <textarea
-                defaultValue={project?.description || ''}
-                rows={3}
-                className="w-full px-4 py-2.5 rounded-xl bg-black/40 border border-white/[0.08] text-white focus:outline-none focus:border-indigo-500 transition-all text-sm resize-none"
-              />
-            </div>
-
-            <div className="pt-4 flex justify-end border-t border-white/[0.05]">
-              <button
-                type="button"
-                className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-medium transition-all shadow-lg shadow-indigo-500/25"
-              >
-                <Save className="w-4 h-4" />
-                Save Changes
-              </button>
-            </div>
-          </form>
-        </div>
-
-        <div className="glass-panel p-6 rounded-2xl border border-rose-500/20 bg-rose-500/5">
-          <h3 className="text-sm font-bold text-rose-400 flex items-center gap-2 mb-2">
-            <AlertTriangle className="w-4 h-4" />
-            Danger Zone
-          </h3>
-          <p className="text-xs text-slate-400 mb-4">
-            Deleting a project is irreversible. All tasks, comments, and files will be permanently deleted.
-          </p>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-sm font-medium transition-all shadow-lg shadow-rose-500/25">
-            <Trash2 className="w-4 h-4" />
-            Delete Project
-          </button>
-        </div>
+        <ProjectSettings project={project} />
       </div>
     </div>
   );

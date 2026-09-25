@@ -12,6 +12,8 @@ import {
   Loader2, 
   Briefcase 
 } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { useLanguage } from '@/context/language-context';
 import type { TeamMemberItem, ProjectRole } from '@/types/team';
 
 interface TeamMemberCardProps {
@@ -28,6 +30,9 @@ export function TeamMemberCard({
   const [isPending, startTransition] = useTransition();
   const [selectedProjectId, setSelectedProjectId] = useState(member.projects[0]?.projectId || '');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const { t: typedT } = useLanguage();
+  const t = typedT as any;
 
   const currentProjectMembership = member.projects.find((p) => p.projectId === selectedProjectId);
   const canManageCurrentProject = userManagedProjectIds.includes(selectedProjectId);
@@ -48,10 +53,10 @@ export function TeamMemberCard({
 
   const handleRemove = () => {
     setIsMenuOpen(false);
-    if (!confirm(`Are you sure you want to remove ${member.fullName} from this project?`)) {
-      return;
-    }
+    setIsConfirmOpen(true);
+  };
 
+  const confirmRemove = () => {
     startTransition(async () => {
       const res = await removeMember({ projectId: selectedProjectId, targetUserId: member.userId });
       if (res.success) {
@@ -59,6 +64,7 @@ export function TeamMemberCard({
       } else {
         toast.error(res.error || 'Failed to remove member.');
       }
+      setIsConfirmOpen(false);
     });
   };
 
@@ -218,6 +224,17 @@ export function TeamMemberCard({
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={confirmRemove}
+        title={t.common?.delete || "Remove Member"}
+        description={`Are you sure you want to remove ${member.fullName} from this project?`}
+        confirmText={t.common?.delete || "Remove"}
+        cancelText={t.common?.cancel || "Cancel"}
+        isDestructive={true}
+      />
     </div>
   );
 }

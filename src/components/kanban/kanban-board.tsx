@@ -6,6 +6,7 @@ import { updateTaskStatus, createTask, deleteTask } from '@/app/actions/kanban';
 import { Plus, MoreVertical, Trash2, Clock, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/context/language-context';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export type Priority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 export type Status = 'TODO' | 'IN_PROGRESS' | 'REVIEW' | 'DONE';
@@ -41,6 +42,7 @@ const PRIORITY_COLORS = {
 export function KanbanBoard({ projectId, initialTasks }: { projectId: string; initialTasks: Task[] }) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [isPending, startTransition] = useTransition();
+  const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
   const { t } = useLanguage();
 
   const getColumnTitle = (id: Status) => {
@@ -132,7 +134,12 @@ export function KanbanBoard({ projectId, initialTasks }: { projectId: string; in
   };
 
   const handleDeleteTask = (taskId: string) => {
-    if (!window.confirm(t.common.delete + '?')) return;
+    setTaskToDelete(taskId);
+  };
+
+  const confirmDeleteTask = async () => {
+    if (!taskToDelete) return;
+    const taskId = taskToDelete;
     
     // Optimistic
     setTasks(tasks.filter(t => t.id !== taskId));
@@ -147,8 +154,9 @@ export function KanbanBoard({ projectId, initialTasks }: { projectId: string; in
   };
 
   return (
-    <div className="flex-1 flex overflow-x-auto overflow-y-hidden pb-4 gap-4 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent h-full">
-      <DragDropContext onDragEnd={handleDragEnd}>
+    <>
+      <div className="flex-1 flex overflow-x-auto overflow-y-hidden pb-4 gap-4 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent h-full">
+        <DragDropContext onDragEnd={handleDragEnd}>
         {COLUMNS_CONFIG.map(column => (
           <div key={column.id} className="flex flex-col w-[280px] sm:w-[320px] shrink-0 snap-center h-full">
             <div className="flex items-center justify-between mb-4">
@@ -238,5 +246,17 @@ export function KanbanBoard({ projectId, initialTasks }: { projectId: string; in
         ))}
       </DragDropContext>
     </div>
+
+    <ConfirmDialog
+      isOpen={!!taskToDelete}
+      onClose={() => setTaskToDelete(null)}
+      onConfirm={confirmDeleteTask}
+      title={t.common.delete}
+      description={t.common.deleteConfirm}
+      confirmText={t.common.delete}
+      cancelText={t.common.cancel}
+      isDestructive={true}
+    />
+    </>
   );
 }

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
+    "@radix-ui/react-dialog": "^1.1.23",
     "@splinetool/react-spline": "^4.1.0",
     "@splinetool/runtime": "^2.0.55",
     "@supabase/ssr": "^0.12.7",

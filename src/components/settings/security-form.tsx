@@ -2,6 +2,7 @@
 
 import React, { useState, useTransition } from 'react';
 import { updatePassword, signOutAllDevices } from '@/app/actions/profile';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { toast } from 'sonner';
 import { 
   KeyRound, 
@@ -21,6 +22,7 @@ export function SecurityForm() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   const handlePasswordSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -52,10 +54,10 @@ export function SecurityForm() {
   };
 
   const handleSignOutAll = () => {
-    if (!confirm('Are you sure you want to sign out from all other active browser sessions?')) {
-      return;
-    }
+    setIsConfirmOpen(true);
+  };
 
+  const confirmSignOutAll = () => {
     startSessionTransition(async () => {
       const res = await signOutAllDevices();
       if (res.success) {
@@ -63,6 +65,7 @@ export function SecurityForm() {
       } else {
         toast.error(res.error || 'Failed to sign out other sessions.');
       }
+      setIsConfirmOpen(false);
     });
   };
 
@@ -182,6 +185,17 @@ export function SecurityForm() {
           </button>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={confirmSignOutAll}
+        title="Sign Out Everywhere"
+        description="Are you sure you want to sign out from all other active browser sessions?"
+        confirmText="Sign Out All"
+        cancelText="Cancel"
+        isDestructive={true}
+      />
     </div>
   );
 }

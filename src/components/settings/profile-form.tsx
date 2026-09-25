@@ -21,6 +21,7 @@ interface ProfileFormProps {
     email: string;
     bio: string;
     avatarUrl: string;
+    tier: string;
   };
 }
 
@@ -31,10 +32,13 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
   const [username, setUsername] = useState(initialProfile.username);
   const [bio, setBio] = useState(initialProfile.bio);
   const [avatarUrl, setAvatarUrl] = useState(initialProfile.avatarUrl);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const currentAvatar =
-    avatarUrl ||
-    `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(username || 'user')}`;
+    avatarFile ? URL.createObjectURL(avatarFile) :
+    (avatarUrl || `https://api.dicebear.com/9.x/avataaars/svg?seed=${encodeURIComponent(username || 'user')}`);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -44,6 +48,9 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
     formData.append('username', username);
     formData.append('bio', bio);
     formData.append('avatarUrl', avatarUrl);
+    if (avatarFile) {
+      formData.append('avatarFile', avatarFile);
+    }
 
     startTransition(async () => {
       const res = await updateProfile(formData);
@@ -59,7 +66,14 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
     const randomSeed = Math.random().toString(36).substring(7);
     const newAvatar = `https://api.dicebear.com/9.x/avataaars/svg?seed=${randomSeed}`;
     setAvatarUrl(newAvatar);
+    setAvatarFile(null);
     toast.info('New avatar generated! Click Save to apply.');
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setAvatarFile(e.target.files[0]);
+    }
   };
 
   return (
@@ -84,14 +98,30 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
             <p className="text-xs text-slate-400 max-w-sm">
               Procedurally generated digital avatar linked to your unique workspace handle.
             </p>
-            <button
-              type="button"
-              onClick={handleRandomizeAvatar}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/25 transition-colors cursor-pointer"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Randomize Avatar</span>
-            </button>
+            <div className="flex items-center gap-2 mt-2">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/10 transition-colors cursor-pointer"
+              >
+                <span>Upload</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleRandomizeAvatar}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/25 transition-colors cursor-pointer"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                <span>Randomize</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -153,6 +183,25 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
               disabled
               value={initialProfile.email}
               className="glass-input w-full pl-10 pr-4 py-2.5 rounded-xl text-sm opacity-60 cursor-not-allowed text-slate-400"
+            />
+          </div>
+        </div>
+
+        {/* Current Tier */}
+        <div className="space-y-1.5">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">
+            Subscription Tier
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <input
+              type="text"
+              readOnly
+              disabled
+              value={initialProfile.tier}
+              className="glass-input w-full pl-10 pr-4 py-2.5 rounded-xl text-sm opacity-60 cursor-not-allowed text-indigo-400 font-bold"
             />
           </div>
         </div>
